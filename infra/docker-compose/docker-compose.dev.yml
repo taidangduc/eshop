@@ -46,7 +46,7 @@ services:
   api:
     build:
       context: ../../
-      dockerfile: src/Api/Dockerfile
+      dockerfile: src/EShop.Api/Dockerfile
     container_name: eshop-api
     environment:
       ASPNETCORE_ENVIRONMENT: Docker   

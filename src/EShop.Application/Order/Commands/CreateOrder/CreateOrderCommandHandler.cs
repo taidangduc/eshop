@@ -1,0 +1,106 @@
+using EShop.Application.Abstractions;
+using EShop.Application.Basket.Queries.GetCartList;
+using EShop.Application.Catalog.Products.Queries.GetVariantById;
+using EShop.Application.Common.Exceptions;
+using EShop.Application.Order.Dtos;
+using EShop.Domain.Entities;
+using EShop.Domain.Enums;
+using EShop.Domain.Repositories;
+using EShop.Domain.ValueObject;
+using MediatR;
+
+namespace EShop.Application.Order.Commands.CreateOrder;
+
+public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, CreateOrderResult>
+{
+    private readonly IOrderRepository _orderRepository;
+    private readonly IMediator _mediator;
+    private readonly IDateTimeProvider _currentTime;
+
+    public CreateOrderCommandHandler(
+        IOrderRepository orderRepository,
+        IMediator mediator,
+        IDateTimeProvider currentTime)
+    {
+        _orderRepository = orderRepository;
+        _mediator = mediator;
+        _currentTime = currentTime;
+    }
+
+    public async Task<CreateOrderResult> Handle(CreateOrderCommand command, CancellationToken cancellationToken)
+    {
+#if (!GrpcOrHttp)
+        // Directly call the mediatr handler instead of gRPC
+        var basket = await _mediator.Send(new GetBasketQueryByCustomer(command.CustomerId))
+            ?? throw new Exception("Basket not found");
+#endif
+
+        if (!basket.Items.Any())
+            throw new Exception("Basket is empty. Cannot create order.");
+
+        var orderItems = new List<OrderItem>();
+        Money totalAmount = Money.InitValue();
+
+        foreach (var basketItem in basket.Items)
+        {
+#if (!GrpcOrHttp)
+            // Directly call the mediatr handler instead of gRPC
+            var variant = await _mediator.Send(new GetVariantByIdQuery(basketItem.ProductVariantId));
+#endif
+            if (variant == null)
+            {
+                throw new EntityNotFoundException();
+            }
+
+            if (variant.Quantity < basketItem.Quantity)
+            {
+                throw new Exception("Not enough product variant quantity");
+            }
+
+            var orderItem = new OrderItem
+            {
+                VariantId = variant.Id,
+                ProductName = variant.ProductName,
+                VariantTitle = variant.Title ?? string.Empty,
+                UnitPrice = variant.Price,
+                Quantity = basketItem.Quantity,
+                ImageUrl = variant.Image?.Url ?? string.Empty
+            };
+
+            orderItems.Add(orderItem);
+            totalAmount += Money.Vnd(orderItem.TotalPrice);
+        }
+
+        if (command.Method == PaymentMethod.COD && command.Provider != PaymentProvider.Unknown)
+            throw new Exception("COD does not use provider");
+
+        if (command.Method == PaymentMethod.Online && command.Provider == PaymentProvider.Unknown)
+            throw new Exception("Online payment requires provider");
+
+        //var orderNumber = TimeHepler.GetCurrentTimeTicks();
+        var orderNumber = _currentTime.OffsetUtcNow.ToUnixTimeMilliseconds();
+
+        var order = Domain.Entities.Order.Create(
+            Guid.NewGuid(),
+            orderNumber,
+            command.CustomerId,
+            Address.Of(command.Street, command.City, command.ZipCode),
+            orderItems,
+            totalAmount,
+            command.Method,
+            command.Provider);
+
+        await _orderRepository.AddAsync(order);
+        await _orderRepository.UnitOfWork.SaveChangesAsync();
+
+        return new CreateOrderResult
+        {
+            OrderId = order.Id,
+            OrderNumber = order.OrderNumber,
+            Amount = order.TotalAmount.Amount,
+            CustomerId = order.CustomerId,
+            PaymentMethod = order.PaymentMethod,
+            PaymentProvider = order.PaymentProvider,
+        };
+    }
+}

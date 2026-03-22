@@ -1,0 +1,17 @@
+using EShop.Application.Common.Dtos;
+
+namespace EShop.Application.Catalog.Products.Queries.GetProductById;
+
+public class ProductItemDto
+{
+    public Guid Id { get; init; }
+    public string Title { get; init; }
+    //public decimal MinPrice { get; init; }
+    //public decimal MaxPrice { get; init; }
+    public string Description { get; init; }
+    public string Category { get; init; }
+    public VariantSummaryDto? VariantSummary { get; set; }
+    public ImageLookupDto? MainImage { get; set; }
+    public List<ImageLookupDto>? Images { get; set; }
+    public List<ProductOptionDto> Options { get; set; }
+}
