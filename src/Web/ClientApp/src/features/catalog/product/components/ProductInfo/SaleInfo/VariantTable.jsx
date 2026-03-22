@@ -1,5 +1,5 @@
-import fallbackImage from "@/assets/images/default.jpg";
-import { TextField } from "@shared/components";
+import fallbackImage from "@/public/default.jpg";
+import { TextField } from "@/components/ui";
 
 function DynamicCell({ opt }) {
   return opt.allowImage ? (

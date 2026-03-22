@@ -1,4 +1,4 @@
-import { RadioGroup } from "@/shared/components";
+import { RadioGroup } from "@/components/ui";
 import styles from "./PaymentMethod.module.css";
 
 export default function PaymentMethod({ items, value, onChange }) {

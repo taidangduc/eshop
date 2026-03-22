@@ -2,8 +2,8 @@ import { usePreview } from "../../contexts/PreviewContext";
 import s from "./ImageGallery.module.css";
 import clsx from "clsx";
 
-import arrowLeft from "@/assets/images/arrow_left.svg";
-import arrowRight from "@/assets/images/arrow_right.svg";
+import arrowLeft from "@/public/arrow_left.svg";
+import arrowRight from "@/public/arrow_right.svg";
 
 const ImageGallery = ({
   images = [],

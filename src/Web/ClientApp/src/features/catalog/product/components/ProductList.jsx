@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { fetchProducts } from "../services/product-service";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Pagination } from "@/shared/components";
+import { Pagination } from "@/components/ui";
 
 export function ProductList() {
   const location = useLocation();

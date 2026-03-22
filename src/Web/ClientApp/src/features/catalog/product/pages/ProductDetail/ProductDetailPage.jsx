@@ -16,8 +16,8 @@ import {
   fetchVariantByOptions,
 } from "../../services/product-service";
 
-import { formatCurrency } from "@/shared/lib/format";
-import fallbackImage from "@/assets/images/default.jpg";
+import { formatCurrency } from "@/lib/format";
+import fallbackImage from "@/public/default.jpg";
 import {
   fetchBasket,
   updateBasket,

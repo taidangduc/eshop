@@ -1,8 +1,8 @@
 import clsx from "clsx";
 import s from "./CheckoutSummary.module.css";
-import fallbackImage from "@/assets/images/default.jpg";
-import { formatCurrency } from "../../../../../shared/lib/format";
-import { TableRow, TableCell } from "@/shared/components";
+import fallbackImage from "@/public/default.jpg";
+import { formatCurrency } from "@/lib/format";
+import { TableRow, TableCell } from "@/components/ui";
 
 export default function CheckoutItem({ item }) {
   const totalPrice = (price, quantity) => price * quantity;

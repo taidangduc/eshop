@@ -1,5 +1,5 @@
-import { apiClient } from "@/shared/lib/api-client";
-import { apiAuth } from "@/shared/lib/api-auth";
+import { apiClient } from "@/lib/api-client";
+import { apiAuth } from "@/lib/api-auth";
 
 export const loginRequest = () => {
   throw new Error("Direct login not supported in BFF architecture. Redirect to /bff/login instead.");

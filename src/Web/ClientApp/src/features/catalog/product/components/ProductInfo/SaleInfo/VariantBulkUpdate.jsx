@@ -1,4 +1,4 @@
-import { TextField } from "@shared/components/TextField/TextField";
+import { TextField } from "@/components/ui/TextField/TextField";
 
 export function VariantBulkUpdate() {
   return (

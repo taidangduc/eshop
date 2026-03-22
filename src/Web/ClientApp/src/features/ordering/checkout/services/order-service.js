@@ -1,5 +1,5 @@
-import { apiAuth } from "@/shared/lib/api-auth";
-import { apiClient } from "@/shared/lib/api-client";
+import { apiAuth } from "@/lib/api-auth";
+import { apiClient } from "@/lib/api-client";
 
 export const fetchOrder = () => apiAuth.get(`/api/v1/orders`);
 

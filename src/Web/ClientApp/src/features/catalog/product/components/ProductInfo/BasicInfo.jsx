@@ -1,4 +1,4 @@
-import { TextField } from "@shared/components/TextField/TextField";
+import { TextField } from "@/components/ui/TextField/TextField";
 import { ImageUploader } from "./ImageUploader";
 
 export function BasicInfo() {

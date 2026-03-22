@@ -9,7 +9,7 @@ export default function BasketHeader() {
             <a className={styles['basket__logo']} href="/">
               <div></div>
               <img
-                src="src/assets/images/logo-brand-no-bg.png"
+                src="src/public/logo-brand-no-bg.png"
                 width="162px"
                 height="50px"
                 alt=""

@@ -1,9 +1,9 @@
 import s from "./BasketItem.module.css";
 import clsx from "clsx";
-import fallbackImage from "@/assets/images/default.jpg";
-import { formatCurrency } from "@/shared/lib/format";
+import fallbackImage from "@/public/default.jpg";
+import { formatCurrency } from "@/lib/format";
 import { BasketItemSkeleton } from "./BasketItemSkeleton";
-import { TableRow, TableCell } from "@/shared/components";
+import { TableRow, TableCell } from "@/components/ui";
 
 export default function BasketItem({
   item,

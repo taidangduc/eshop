@@ -1,8 +1,8 @@
 import CheckoutItem from "./CheckoutItem";
-import { formatCurrency } from "@shared/lib/format";
+import { formatCurrency } from "@/lib/format";
 import s from "./CheckoutSummary.module.css";
 import clsx from "clsx";
-import { Table, TableHeader, TableHeaderCell, TableBody } from "@/shared/components";
+import { Table, TableHeader, TableHeaderCell, TableBody } from "@/components/ui";
 
 export default function CheckoutSummary({ items = [] }) {
   const totalResult = items?.reduce(
