@@ -6,9 +6,9 @@ import NotFound from "./not-found";
 
 import { CheckoutPage } from "../features/ordering/checkout/pages/Checkout/CheckoutPage";
 import { CheckoutResultPage } from "../features/ordering/checkout/pages/CheckoutResult/CheckoutResultPage";
-import RootLayout from "../layouts/storefront/layout";
+import RootLayout from "../components/layouts/storefront/layout";
 import { ProductEditorPage } from "../features/catalog/product/pages/ProductEditor/ProductEditorPage";
-import AdminLayout from "../layouts/backoffice/layout";
+import AdminLayout from "../components/layouts/backoffice/layout";
 
 export const routes = [
   // root routes

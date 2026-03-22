@@ -7,7 +7,7 @@ export default function CheckoutHeader() {
           <a className={s["checkout-header-brand"]} href="/">
             <div></div>
             <img
-              src="src/assets/images/logo-brand-no-bg.png"
+              src="src/public/logo-brand-no-bg.png"
               width="162px"
               height="50px"
               alt=""

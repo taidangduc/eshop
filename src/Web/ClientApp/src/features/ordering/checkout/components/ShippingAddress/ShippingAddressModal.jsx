@@ -3,7 +3,7 @@ import s from "./ShippingAddress.module.css";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { shippingAddressSchema } from "../../schema/shipping-address.schema";
-import { TextField } from "@/shared/components";
+import { TextField } from "@/components/ui";
 import { useEffect } from "react";
 
 export default function ShippingAddressModal({

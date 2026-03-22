@@ -1,4 +1,4 @@
-import { apiClient } from "@/shared/lib/api-client";
+import { apiClient } from "@/lib/api-client";
 
 export const fetchProducts = (page = 1, size = 10) =>
   apiClient.get(

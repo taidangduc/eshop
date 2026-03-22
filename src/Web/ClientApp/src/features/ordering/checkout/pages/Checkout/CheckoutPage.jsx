@@ -6,15 +6,15 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 
 import { fetchBasket } from "../../../../basket/services/basket-service";
-import { formatCurrency } from "@/shared/lib/format";
+import { formatCurrency } from "@/lib/format";
 import { placeOrder, createPaymentUrl } from "../../services/order-service";
-import { Modal } from "@/shared/components";
+import { Modal } from "@/components/ui";
 
 import CheckoutHeader from "../../components/CheckoutHeader/CheckoutHeader";
 import ShippingAddress from "../../components/ShippingAddress/ShippingAddress";
 import CheckoutSummary from "../../components/CheckoutSummary/CheckoutSummary";
 import PaymentMethod from "../../components/PaymentMethod/PaymentMethod";
-import NavBar from "@/layouts/storefront/components/Navbar/Navbar";
+import NavBar from "@/components/layouts/storefront/components/Navbar/Navbar";
 
 export function CheckoutPage() {
   const navigate = useNavigate();

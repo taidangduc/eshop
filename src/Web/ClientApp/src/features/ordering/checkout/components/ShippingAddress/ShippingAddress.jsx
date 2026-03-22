@@ -1,4 +1,4 @@
-import { Modal } from "@/shared/components";
+import { Modal } from "@/components/ui";
 import s from "./ShippingAddress.module.css";
 import clsx from "clsx";
 import ShippingAddressModal from "./ShippingAddressModal";

@@ -4,7 +4,7 @@ import {
   TextSkeleton,
   TableRow,
   TableCell,
-} from "@/shared/components";
+} from "@/components/ui";
 
 export const BasketItemSkeleton = () => {
   return (

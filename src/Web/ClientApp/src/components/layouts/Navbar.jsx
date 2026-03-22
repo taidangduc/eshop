@@ -1,4 +1,4 @@
-import fallbackImage from "@/assets/images/default.jpg";
+import fallbackImage from "@/public/default.jpg";
 import { useAuth } from "@/features/identity/hooks/useAuth";
 
 export default function NavBar() {

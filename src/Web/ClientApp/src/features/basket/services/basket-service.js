@@ -1,4 +1,4 @@
-import { apiAuth } from "@/shared/lib/api-auth";
+import { apiAuth } from "@/lib/api-auth";
 
 export const fetchBasket = () => apiAuth.get(`/api/v1/basket`);
 

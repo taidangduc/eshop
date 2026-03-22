@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { getPageList } from "../../utils/pagination";
+import {getPageList} from "../../../lib/pagination"
 import s from "./Pagination.module.css";
 
 export function Pagination({ currentPage, totalPage, onChange }) {

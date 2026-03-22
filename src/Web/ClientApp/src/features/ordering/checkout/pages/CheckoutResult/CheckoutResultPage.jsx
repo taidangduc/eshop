@@ -3,7 +3,7 @@ import s from "./CheckoutResultPage.module.css";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { fetchCheckoutOrder } from "../../services/order-service";
-import { PageLoading } from "@shared/components/Loading/PageLoading";
+import { PageLoading } from "@/components/ui/Loading/PageLoading";
 
 export const CheckoutResultPage = () => {
   const navigate = useNavigate();

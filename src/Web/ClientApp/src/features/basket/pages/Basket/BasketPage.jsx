@@ -1,4 +1,4 @@
-import NavBar from "@/layouts/storefront/components/Navbar/Navbar";
+import NavBar from "@/components/layouts/storefront/components/Navbar/Navbar";
 import s from "./BasketPage.module.css";
 import clsx from "clsx";
 import {
@@ -7,14 +7,14 @@ import {
   TableHeader,
   TableHeaderCell,
   TableBody,
-} from "@/shared/components";
+  PageLoading,
+} from "@/components/ui";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchBasket, updateBasket } from "../../services/basket-service";
 import { useEffect, useState } from "react";
-import { formatCurrency } from "@/shared/lib/format";
+import { formatCurrency } from "@/lib/format";
 import { BasketItem, BasketEmpty, BasketHeader } from "../../components";
-import { PageLoading } from "@/shared/components";
 
 export function BasketPage() {
   const navigate = useNavigate();
@@ -280,7 +280,7 @@ export function BasketPage() {
                 <div className={s["basket__footer-promotion"]}>
                   <img
                     style={{ marginRight: "8px" }}
-                    src="src/assets/images/voucher_icon.svg"
+                    src="src/public/voucher_icon.svg"
                   />
                   <div>Platform voucher</div>
                   <div className="flex-1"></div>

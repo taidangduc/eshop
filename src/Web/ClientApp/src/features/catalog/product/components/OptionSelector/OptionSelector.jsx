@@ -1,8 +1,8 @@
 import { usePreview } from "../../contexts/PreviewContext";
 import s from "./OptionSelector.module.css";
 import clsx from "clsx";
-import fallbackImage from "@/assets/images/default.jpg";
-import { Checkbox } from "@/shared/components";
+import fallbackImage from "@/public/default.jpg";
+import { Checkbox } from "@/components/ui";
 
 export function OptionSelector({ options, selectedOption, onChange }) {
   // context

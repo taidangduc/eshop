@@ -1,4 +1,4 @@
-import { TextField } from "@shared/components";
+import { TextField } from "@/components/ui";
 
 import { VariantCreator } from "./VariantCreator";
 import { VariantBulkUpdate } from "./VariantBulkUpdate";
