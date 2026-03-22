@@ -183,4 +183,4 @@ For cross-boundary communication:
 
 ## Frontend
 
-React + Vite app in `src/Web/ClientApp/` communicates with backend via HTTP APIs.
+React + Vite app in `src/EShop.StoreFront/` communicates with backend via HTTP APIs.

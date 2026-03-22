@@ -26,7 +26,7 @@ var identityService = builder.AddProject<Projects.IdentityService>("identityserv
     .WaitFor(apiService);
 
 // test / dev local frontend with react and vite
-var reactVite = builder.AddViteApp("webfrontend", "../Web/ClientApp")
+var reactVite = builder.AddViteApp("webfrontend", "../EShop.StoreFront")
     .WithReference(apiService)
     .WaitFor(apiService)
     .WithEndpoint("http", e => e.Port = 3000) // fixed port for frontend

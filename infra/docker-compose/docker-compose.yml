@@ -74,7 +74,7 @@ services:
   frontend:
     build:
       context: ../../
-      dockerfile: src/Web/ClientApp/Dockerfile
+      dockerfile: src/EShop.StoreFront/Dockerfile
     container_name: eshop-frontend
     # expose port 80 to the internal network; nginx will serve on host:80
     expose:

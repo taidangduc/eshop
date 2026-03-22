@@ -56,7 +56,7 @@ Provide a sample production-ready foundation for an online store with clean arch
 - `src/Infrastructure` — persistence, external service adapters and dependency injection wiring.
 - `src/EventBus` and `src/EventBus.InMemory` — event bus abstractions and an in-memory provider.
 - `src/Outbox.EF` — Outbox pattern implementation backed by EF Core.
-- `src/Web/ClientApp` — web client with React + Vite
+- `src/EShop.StoreFront` — web client with React + Vite
 - `infra/docker-compose` — Docker Compose configs for dev and production scenarios.
 - `infra/nginx` — nginx configuration used by compose setups.
 - `tests/UnitTests` and `tests/IntegrationTests` — test projects.
