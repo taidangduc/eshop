@@ -9,5 +9,5 @@ export { ProductPrice } from "./ProductSummary/ProductPrice";
 export { QuantitySelector } from "./QuantiySelector/QuantitySelector";
 export { OptionSelector } from "./OptionSelector/OptionSelector";
 
-export { ProductDetails } from "./ProductDetails/ProductDetails";
+export { ProductDetail } from "./ProductDetail/ProductDetail";
 export { default as ImageGallery } from "./ImageGallery/ImageGallery";

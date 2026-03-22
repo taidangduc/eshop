@@ -2,7 +2,7 @@ import { Outlet } from "react-router-dom";
 import NavBar from "./components/Navbar/Navbar";
 import Header from "./components/Header/Header";
 
-export default function StoreFrontLayout() {
+export default function RootLayout() {
   return (
     <div id="main">
       <div className="flex flex-col">

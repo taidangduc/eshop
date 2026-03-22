@@ -2,7 +2,7 @@ import clsx from "clsx";
 import s from "./ShippingAddress.module.css";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { shippingAddressSchema } from "../../schema/shippingAddress.schema";
+import { shippingAddressSchema } from "../../schema/shipping-address.schema";
 import { TextField } from "@/shared/components";
 import { useEffect } from "react";
 
@@ -40,8 +40,9 @@ export default function ShippingAddressModal({
             <div className={s["shipping-address__modal-container"]}>
               <div className={s["shipping-address__form-content"]}>
                 {/* FULLNAME AND PHONE NUMBER */}
-                <div className="flex 100w">
+                <div className="flex 100w mt-[6px] mb-[15px]">
                   <TextField
+                    className=""
                     type="text"
                     label="Fullname"
                     placeholder="Fullname"
@@ -59,7 +60,7 @@ export default function ShippingAddressModal({
                   />
                 </div>
                 {/* CITY AND ZIPCODE */}
-                <div className="flex 100w">
+                <div className="flex 100w mt-[6px] mb-[15px]">
                   <div className={clsx(s["shipping-address__col--main"])}>
                     <TextField
                       type="text"
@@ -85,7 +86,7 @@ export default function ShippingAddressModal({
                   </div>
                 </div>
                 {/* STREET */}
-                <div className="flex 100w">
+                <div className="flex 100w mt-[6px] mb-[15px]">
                   <TextField
                     type="text"
                     label="Street"
@@ -110,7 +111,7 @@ export default function ShippingAddressModal({
                   disabled={!isValid || isSubmitting}
                   className={clsx(
                     s["shipping-address__button"],
-                    s["shipping-address__button--submit"]
+                    s["shipping-address__button--submit"],
                   )}
                 >
                   Submit
