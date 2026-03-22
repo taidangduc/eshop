@@ -6,7 +6,7 @@ import {
   ProductSummary,
   OptionSelector,
   QuantitySelector,
-  ProductDetails
+  ProductDetail
 } from "../../components";
 import { PreviewProvider } from "../../contexts/PreviewContext";
 import { useParams } from "react-router-dom";
@@ -327,7 +327,7 @@ export function ProductDetailPage() {
             </PreviewProvider>
           </div>
           {/* Description: product description, dimestions, ...*/}
-          <ProductDetails
+          <ProductDetail
             category={product.category}
             description={product.description}
           />

@@ -1,7 +1,7 @@
 .text-field__container {
     position: relative;
-    margin-top: 6px;
-    margin-bottom: 15px;
+    /* margin-top: 6px;
+    margin-bottom: 15px; */
     flex: 1 1 0%;
 }
 
@@ -40,7 +40,7 @@
     display: block;
     box-sizing: border-box;
     flex: 1 1 0%;
-    height: 38px;
+    height: 40px;
     width: 100%;
     padding: 10px;
     font-size: 14px;

@@ -19,7 +19,7 @@ export const TextField = ({
       <div className={s['text-field']}>
         <div className={s['text-field__label']}>{label}</div>
         <input
-          className={clsx(s['text-field__input'])}
+          className={clsx(s['text-field__input'], className)}
           type={type}
           name={name}
           value={value}

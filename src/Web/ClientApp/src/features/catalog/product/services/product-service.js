@@ -18,3 +18,13 @@ export const fetchVariantByOptions = (productId, optionValueMap) =>
       },
     }
   );
+
+// admin
+export const fetchAllProducts = (page = 1, size = 10) =>
+  apiClient.get(
+    `/api/v1/catalog/products/get-all/?PageSize=${size}&PageIndex=${page}`
+  );
+
+export const createProductDraft = () =>
+  apiClient.post(`/api/v1/catalog/products/create-draft`);
+
