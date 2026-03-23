@@ -21,8 +21,8 @@ jobs:
       with:
         dotnet-version: 9.x.x
     - name: Restore
-      run: dotnet restore ./eshop.slnx
+      run: dotnet restore ./eshop.sln
     - name: Build
-      run: dotnet build ./eshop.slnx --no-restore
+      run: dotnet build ./eshop.sln --no-restore
     - name: Test
-      run: dotnet test ./eshop.slnx --no-build --verbosity normal
+      run: dotnet test ./eshop.sln --no-build --verbosity normal
