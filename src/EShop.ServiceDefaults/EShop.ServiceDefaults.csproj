@@ -30,8 +30,4 @@
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.1.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\EShop.Shared\EShop.Shared.csproj" />
-  </ItemGroup>
-
 </Project>

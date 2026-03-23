@@ -30,8 +30,7 @@ public class GetProductByIdQueryHandler : IRequestHandler<GetProductByIdQuery, P
         var products = await _readRepository
             .GetQueryableSet()
             .AsNoTracking()
-            .AsSplitQuery()
-            .Where(x => x.Id == request.Id)
+            .Where(x => x.Id == request.Id)      
             .Select(m => new ProductItemDto
             {
                 Id = m.Id,

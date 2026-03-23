@@ -38,7 +38,6 @@ public static class ApplicationServiceExtensions
         builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ActivityBehavior<,>));
         builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(LoggingBehavior<,>));
         builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
-        builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(TxBehavior<,>));
 
         return builder;
     }

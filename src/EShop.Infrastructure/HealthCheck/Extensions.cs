@@ -3,9 +3,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
-using EShop.Shared.Constants;
 
 namespace EShop.Infrastructure.HealthCheck;
 
@@ -20,7 +18,7 @@ public static class Extensions
 
         if (healthOptions.Enabled)
         {
-            var appOptions = builder.Configuration.GetSection("AppOptions").Get<AppOptions>()!;
+           //var appOptions = builder.Configuration.GetSection("AppOptions").Get<AppOptions>()!;
             var postgreOptions = builder.Configuration.GetSection("ConnectionStrings:shopdb").Value;
 
             if (!string.IsNullOrEmpty(postgreOptions))
@@ -31,7 +29,7 @@ public static class Extensions
             builder.Services.AddHealthChecksUI(cfg =>
             {
                 cfg.SetEvaluationTimeInSeconds(60); // time in seconds between check
-                cfg.AddHealthCheckEndpoint($"Self Check - {appOptions.Name}", HealthEndpoint);
+               // cfg.AddHealthCheckEndpoint($"Self Check - {appOptions.Name}", HealthEndpoint);
             }).AddInMemoryStorage();
         }
 

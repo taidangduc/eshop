@@ -1,6 +1,6 @@
 using EShop.Application.Abstractions;
 using EShop.Application.Catalog.Products.Services;
-using EShop.Application.Common.Interfaces;
+
 using Ardalis.GuardClauses;
 using MediatR;
 using Microsoft.EntityFrameworkCore;

@@ -13,10 +13,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="C:\Users\taida\.nuget\packages\vnpay.net\2.1.0\contentFiles\any\netstandard2.1\Icon.ico" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.2.0" />
     <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.0.2" />
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
@@ -42,7 +38,6 @@
     <ProjectReference Include="..\EShop.EventBus.RabbitMQ\EShop.EventBus.RabbitMQ.csproj" />
     <ProjectReference Include="..\EShop.Outbox.EF\EShop.Outbox.EF.csproj" />
     <ProjectReference Include="..\EShop.Persistence\EShop.Persistence.csproj" />
-    <ProjectReference Include="..\EShop.Shared\EShop.Shared.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -6,25 +6,24 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using EShop.Shared.Constants;
 using System.Data.Common;
 
 namespace EShop.Infrastructure.HostServices;
 
 public class GracePeriodBackgroundService(
     ILogger<GracePeriodBackgroundService> logger,
-    IOptions<BackgroundTaskOptions> options,
+    //IOptions<BackgroundTaskOptions> options,
     IServiceScopeFactory serviceScopeFactory,
     IEventPublisher eventPublisher
     ) : BackgroundService
 {
-    private readonly BackgroundTaskOptions _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
+    //private readonly BackgroundTaskOptions _options = options?.Value ?? throw new ArgumentNullException(nameof(options));
     private readonly IServiceScopeFactory _serviceScopeFactory = serviceScopeFactory;
     private readonly IEventPublisher _eventPublisher = eventPublisher;
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        var delayTime = TimeSpan.FromSeconds(_options.CheckUpdateTime);
+        //var delayTime = TimeSpan.FromSeconds(_options.CheckUpdateTime);
 
         logger.LogInformation("GracePeriodBackgroundService is starting.");
 
@@ -34,7 +33,7 @@ public class GracePeriodBackgroundService(
             var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
 
             await CheckConfirmedGracePeriodOrders(db, stoppingToken);
-            await Task.Delay(delayTime, stoppingToken);
+            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
         }
 
         logger.LogInformation("GracePeriodBackgroundService is stopping");
@@ -58,7 +57,8 @@ public class GracePeriodBackgroundService(
         try
         {
             // logic: set locked edit order = processing status
-            var cutoff = DateTime.UtcNow - TimeSpan.FromMinutes(_options.GracePeriodTime);
+            //var cutoff = DateTime.UtcNow - TimeSpan.FromMinutes(_options.GracePeriodTime);
+            var cutoff = DateTime.UtcNow - TimeSpan.FromMinutes(15);
 
             var ids = await dbContext.Orders
                 .Where(x =>

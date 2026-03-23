@@ -1,13 +1,11 @@
 using EShop.Application.Basket.EventHandlers;
 using EShop.Application.Catalog.Products.EventHandlers;
-using EShop.Application.Common.Interfaces;
 using EShop.Application.Customer.EventHandlers;
 using EShop.Application.Order.IntegrationEventHandlers;
 using EShop.Contracts.IntegrationEvents;
 using EShop.EventBus;
 using EShop.EventBus.Abstractions;
 using EShop.EventBus.RabbitMQ;
-using EShop.Infrastructure.ExternalServices.Notifications.Email;
 using EShop.Infrastructure.ExternalServices.Payment;
 using EShop.Infrastructure.ExternalServices.Payment.Vnpay;
 using EShop.Infrastructure.ExternalServices.Payment.Stripe;
@@ -15,8 +13,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using EShop.Outbox.EF.Extensions;
 using EShop.Outbox.EF.Infrastructure.Data;
-using EShop.Shared.Constants;
-using EShop.Shared.Web;
 using EShop.Persistence;
 using EShop.Migrator;
 using EShop.Application.Abstractions;
@@ -28,17 +24,17 @@ public static class DependencyInjection
     public static WebApplicationBuilder AddInfrastructure(this WebApplicationBuilder builder)
     {
         // Get Configuration
-        var appSettings = builder.Configuration.GetOptions<AppSettings>();
-        builder.Services.Configure<VnpayOptions>(builder.Configuration.GetSection("VnpayConf"));
-        builder.Services.Configure<StripeOptions>(builder.Configuration.GetSection("StripeConf"));
+        //var appSettings = builder.Configuration.GetOptions<AppSettings>();
+        //builder.Services.Configure<VnpayOptions>(builder.Configuration.GetSection("VnpayConf"));
+        //builder.Services.Configure<StripeOptions>(builder.Configuration.GetSection("StripeConf"));
 
-        builder.Services.AddSingleton(appSettings);
+        //builder.Services.AddSingleton(appSettings);
 
         // Add Persistence Layer
         //builder.AddPersistence();
 
         // External Services
-        builder.Services.AddTransient<IEmailService, SmtpEmailSender>();
+        //builder.Services.AddTransient<IEmailService, SmtpEmailSender>();
         //builder.Services.AddScoped<IFileService, LocalStorage>();
                
         builder.Services.AddScoped<IPaymentGateway, VnpayPaymentGateway>();

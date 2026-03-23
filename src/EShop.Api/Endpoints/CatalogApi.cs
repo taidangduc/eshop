@@ -26,7 +26,7 @@ using AutoMapper;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using EShop.Shared.Constants;
+using EShop.Infrastructure.Identity;
 
 namespace EShop.Api.Endpoints;
 
@@ -55,14 +55,14 @@ public static class CatalogApi
         // Product
         productGroupApi.MapGet("/get-available", GetAvailableProducts);
         productGroupApi.MapGet("/", GetListProduct)
-            .RequireAuthorization(IdentityConstant.Role.Admin);      
+            .RequireAuthorization(Authorization.Roles.Admin);      
         productGroupApi.MapGet($"/{{id}}", GetProductById);
         productGroupApi.MapPost("/", CreateProduct)
-            .RequireAuthorization(IdentityConstant.Role.Admin);
+            .RequireAuthorization(Authorization.Roles.Admin);
         productGroupApi.MapPut("/", UpdateProduct)
-            .RequireAuthorization(IdentityConstant.Role.Admin);
+            .RequireAuthorization(Authorization.Roles.Admin);
         productGroupApi.MapDelete($"/{{id}}", DeleteProduct)
-            .RequireAuthorization(IdentityConstant.Role.Admin);
+            .RequireAuthorization(Authorization.Roles.Admin);
 
         // Variant
         productGroupApi.MapGet($"/variants/{{id}}", GetVariantById);

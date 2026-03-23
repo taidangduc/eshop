@@ -31,6 +31,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EShop.Contracts\EShop.Contracts.csproj" />
+    <ProjectReference Include="..\EShop.Infrastructure\EShop.Infrastructure.csproj" />
     <ProjectReference Include="..\EShop.EventBus.RabbitMQ\EShop.EventBus.RabbitMQ.csproj" />
     <ProjectReference Include="..\EShop.EventBus\EShop.EventBus.csproj" />
     <ProjectReference Include="..\EShop.Migrator\EShop.Migrator.csproj" />

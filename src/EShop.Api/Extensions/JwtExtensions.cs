@@ -1,7 +1,6 @@
+using EShop.Infrastructure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using EShop.Shared.Constants;
-using EShop.Shared.Web;
 
 namespace EShop.Api.Extensions;
 
@@ -9,7 +8,7 @@ public static class JwtExtensions
 {
     public static IServiceCollection AddJwt(this IServiceCollection services)
     {
-        var jwtOptions = services.GetOptions<Identity>("Identity");
+        //var jwtOptions = services.GetOptions<Identity>("Identity");
         //.AddJwtBearer(options =>
         //{
         //    options.Authority = jwtOptions.Authority;
@@ -50,19 +49,19 @@ public static class JwtExtensions
             {
                 //Role-bases
                 options.AddPolicy(
-                    IdentityConstant.Role.Admin,
+                    Authorization.Roles.Admin,
                     x =>
                     {
                         x.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
-                        x.RequireRole(IdentityConstant.Role.Admin);
+                        x.RequireRole(Authorization.Roles.Admin);
                     }
                 );
                 options.AddPolicy(
-                    IdentityConstant.Role.User,
+                    Authorization.Roles.User,
                     x =>
                     {
                         x.AddAuthenticationSchemes(JwtBearerDefaults.AuthenticationScheme);
-                        x.RequireRole(IdentityConstant.Role.User);
+                        x.RequireRole(Authorization.Roles.User);
                     }
                 );
             });

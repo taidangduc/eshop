@@ -23,7 +23,6 @@
     <ProjectReference Include="..\EShop.Application\EShop.Application.csproj" />
     <ProjectReference Include="..\EShop.Infrastructure\EShop.Infrastructure.csproj" />
     <ProjectReference Include="..\EShop.ServiceDefaults\EShop.ServiceDefaults.csproj" />
-    <ProjectReference Include="..\EShop.Shared\EShop.Shared.csproj" />
   </ItemGroup>
 
 </Project>

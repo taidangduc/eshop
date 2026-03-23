@@ -5,7 +5,7 @@ using EShop.IdentityService.Infrastructure.Entity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using EShop.Migrator;
-using EShop.Shared.Constants;
+using EShop.Infrastructure.Identity;
 
 namespace EShop.IdentityService.Infrastructure.Seed;
 
@@ -33,14 +33,14 @@ public class DataSeeder : IDataSeeder<IdentityContext>
     {
         if (!await _roleManager.Roles.AnyAsync())
         {
-            if (!await _roleManager.RoleExistsAsync(IdentityConstant.Role.Admin))
+            if (!await _roleManager.RoleExistsAsync(Authorization.Roles.Admin))
             {
-                await _roleManager.CreateAsync(new Role { Name = IdentityConstant.Role.Admin });
+                await _roleManager.CreateAsync(new Role { Name = Authorization.Roles.Admin });
             }
 
-            if (!await _roleManager.RoleExistsAsync(IdentityConstant.Role.User))
+            if (!await _roleManager.RoleExistsAsync(Authorization.Roles.User))
             {
-                await _roleManager.CreateAsync(new Role { Name = IdentityConstant.Role.User });
+                await _roleManager.CreateAsync(new Role { Name = Authorization.Roles.User });
             }
         }
     }
@@ -54,7 +54,7 @@ public class DataSeeder : IDataSeeder<IdentityContext>
                 var result = await _userManager.CreateAsync(InitialData.Users.First(), "admin@12345");
                 if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(InitialData.Users.First(), IdentityConstant.Role.Admin);
+                    await _userManager.AddToRoleAsync(InitialData.Users.First(), Authorization.Roles.Admin);
                     await _eventPublisher.PublishAsync(new UserCreatedIntegrationEvent
                     {
                         UserId = InitialData.Users.First().Id,
@@ -68,7 +68,7 @@ public class DataSeeder : IDataSeeder<IdentityContext>
                 var result = await _userManager.CreateAsync(InitialData.Users.Last(), "user@12345");
                 if (result.Succeeded)
                 {
-                    await _userManager.AddToRoleAsync(InitialData.Users.Last(), IdentityConstant.Role.User);
+                    await _userManager.AddToRoleAsync(InitialData.Users.Last(), Authorization.Roles.User);
                     await _eventPublisher.PublishAsync(new UserCreatedIntegrationEvent
                     {
                         UserId = InitialData.Users.Last().Id,

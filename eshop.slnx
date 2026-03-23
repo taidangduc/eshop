@@ -16,7 +16,6 @@
     <Project Path="src/EShop.Outbox/EShop.Outbox.csproj" />
     <Project Path="src/EShop.Persistence/EShop.Persistence.csproj" />
     <Project Path="src/EShop.ServiceDefaults/EShop.ServiceDefaults.csproj" />
-    <Project Path="src/EShop.Shared/EShop.Shared.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/EShop.UnitTests/EShop.UnitTests.csproj" />
