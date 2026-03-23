@@ -1,4 +1,4 @@
-namespace EShop.Infrastructure.ExternalServices.Storage.Local;
+namespace EShop.Infrastructure.Storage;
 
 public class LocalOptions
 {

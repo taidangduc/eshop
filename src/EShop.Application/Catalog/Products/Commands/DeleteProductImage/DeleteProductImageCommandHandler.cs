@@ -8,14 +8,15 @@ namespace EShop.Application.Catalog.Products.Commands.DeleteProductImage;
 public class DeleteProductImageCommandHandler : IRequestHandler<DeleteProductImageCommand, Unit>
 {
     private readonly IProductService _productService;
-    private readonly IFileService _storageService;
+    //private readonly IFileService _storageService;
 
     public DeleteProductImageCommandHandler(
-        IProductService productService, 
-        IFileService storageService)
+        IProductService productService
+        //, IFileService storageService
+        )
     {
         _productService = productService;
-        _storageService = storageService;
+       // _storageService = storageService;
     }
 
     public async Task<Unit> Handle(DeleteProductImageCommand request, CancellationToken cancellationToken)
@@ -27,10 +28,10 @@ public class DeleteProductImageCommandHandler : IRequestHandler<DeleteProductIma
         Guard.Against.NotFound(request.Id, productImage);
 
         // remove image from storage
-        if (productImage.Image != null)
-        {
-            await _storageService.DeleteFileAsync(new DeleteFileRequest { FileName = productImage.Image.FileName });
-        }
+        // if (productImage.Image != null)
+        // {
+        //     await _storageService.DeleteFileAsync(new DeleteFileRequest { FileName = productImage.Image.FileName });
+        // }
 
         product.RemoveImage(request.Id);
 

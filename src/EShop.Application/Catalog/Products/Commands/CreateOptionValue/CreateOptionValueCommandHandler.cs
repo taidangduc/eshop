@@ -9,14 +9,15 @@ namespace EShop.Application.Catalog.Products.Commands.CreateOptionValue;
 public class CreateOptionValueCommandHandler : IRequestHandler<CreateOptionValueCommand, Unit>
 {
     private readonly IProductService _productService;
-    private readonly IFileService _storageService;
+    //private readonly IFileService _storageService;
 
     public CreateOptionValueCommandHandler(
-        IProductService productService, 
-        IFileService storageService)
+        IProductService productService
+        //IFileService storageService
+        )
     {
         _productService = productService;
-        _storageService = storageService;
+       // _storageService = storageService;
     }
 
     public async Task<Unit> Handle(CreateOptionValueCommand request, CancellationToken cancellationToken)
@@ -31,18 +32,18 @@ public class CreateOptionValueCommandHandler : IRequestHandler<CreateOptionValue
         };
 
         Image? image = null;
-        if (request.MediaFile != null)
-        {
-            var metaData = await _storageService.AddFileAsync(request.MediaFile);
+        // if (request.MediaFile != null)
+        // {
+        //     var metaData = await _storageService.AddFileAsync(request.MediaFile);
 
-            image = new Image
-            {
-                Id = Guid.CreateVersion7(),
-                BaseUrl = metaData.BaseUrl,
-                FileName = $"{metaData.Path}/{metaData.Name}",
-                AllText = $"seo all text - {request.ProductId}"
-            };
-        }
+        //     image = new Image
+        //     {
+        //         Id = Guid.CreateVersion7(),
+        //         BaseUrl = metaData.BaseUrl,
+        //         FileName = $"{metaData.Path}/{metaData.Name}",
+        //         AllText = $"seo all text - {request.ProductId}"
+        //     };
+        // }
 
         product.AddOptionValue(request.OptionId, optionValue, image);
 

@@ -14,7 +14,7 @@ namespace EShop.Persistence;
 
 public static class Extensions
 {
-    public static WebApplicationBuilder AddPersistence(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddPersistence(this WebApplicationBuilder builder, string ConnectionStrings)
     {
         // Interceptors
         builder.Services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
@@ -24,7 +24,7 @@ public static class Extensions
         builder.Services.AddDbContext<ApplicationDbContext>((sp, options) =>
         {
             options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
-            options.UseNpgsql(builder.Configuration.GetConnectionString("shopdb"));
+            options.UseNpgsql(ConnectionStrings);
 
             options.ConfigureWarnings(warnings => warnings.Ignore(RelationalEventId.PendingModelChangesWarning));
         });

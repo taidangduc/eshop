@@ -12,7 +12,7 @@ public static class OutboxEfExtensions
 {
     public static void AddTransactionalOutbox(this IHostApplicationBuilder builder)
     {
-        builder.AddNpgsqlDbContext<OutboxDbContext>("shopdb");
+        builder.AddNpgsqlDbContext<OutboxDbContext>("EShopDb");
 
         builder.Services.AddScoped<IOutboxMessageProcessor, OutboxMessageProcessor>();
         builder.Services.AddScoped<IPollingOutboxMessageRepository, PollingOutboxMessageRepository>();

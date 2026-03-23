@@ -9,7 +9,7 @@ public class OutboxDbContextFactory : IDesignTimeDbContextFactory<OutboxDbContex
     {
         var optionsBuilder = new DbContextOptionsBuilder<OutboxDbContext>();
 
-        optionsBuilder.UseNpgsql("Host=localhost;Database=shopdb;Username=postgres;Password=postgres;");
+        optionsBuilder.UseNpgsql("Host=localhost;Database=EShopDb;Username=postgres;Password=postgres;");
 
         return new OutboxDbContext(optionsBuilder.Options);
     }

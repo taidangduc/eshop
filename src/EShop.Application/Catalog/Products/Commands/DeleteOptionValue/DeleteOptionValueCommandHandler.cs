@@ -10,14 +10,15 @@ namespace EShop.Application.Catalog.Products.Commands.DeleteOptionValue
     public class DeleteOptionValueCommandHandler : IRequestHandler<DeleteOptionValueCommand, Unit>
     {
         private readonly IProductService _productService;
-        private readonly IFileService _storageService;
+        //private readonly IFileService _storageService;
 
         public DeleteOptionValueCommandHandler(
-            IProductService productService, 
-            IFileService storageService)
+            IProductService productService 
+            //IFileService storageService
+            )
         {
             _productService = productService;
-            _storageService = storageService;
+           // _storageService = storageService;
         }
 
         public async Task<Unit> Handle(DeleteOptionValueCommand request, CancellationToken cancellationToken)
@@ -32,10 +33,10 @@ namespace EShop.Application.Catalog.Products.Commands.DeleteOptionValue
             Guard.Against.NotFound(request.OptionValueId, optionValue);
 
             // remove image from storage
-            if (optionValue.Image != null)
-            {
-                await _storageService.DeleteFileAsync(new DeleteFileRequest { FileName = optionValue.Image.FileName });
-            }
+            // if (optionValue.Image != null)
+            // {
+            //     await _storageService.DeleteFileAsync(new DeleteFileRequest { FileName = optionValue.Image.FileName });
+            // }
 
             product.RemoveOptionValue(request.OptionId, request.OptionValueId);
 

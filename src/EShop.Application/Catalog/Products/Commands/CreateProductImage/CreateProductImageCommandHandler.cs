@@ -9,12 +9,14 @@ namespace EShop.Application.Catalog.Products.Commands.CreateProductImage;
 public class CreateProductImageCommandHandler : IRequestHandler<CreateProductImageCommand, Unit>
 {
     private readonly IProductService _productService;
-    private readonly IFileService _storageService;
+    //private readonly IFileService _storageService;
 
-    public CreateProductImageCommandHandler(IProductService productService, IFileService storageService)
+    public CreateProductImageCommandHandler(IProductService productService
+    //, IFileService storageService
+    )
     {
         _productService = productService;
-        _storageService = storageService;
+       // _storageService = storageService;
     }
 
     public async Task<Unit> Handle(CreateProductImageCommand request, CancellationToken cancellationToken)
@@ -28,18 +30,18 @@ public class CreateProductImageCommandHandler : IRequestHandler<CreateProductIma
             IsMain = request.IsMain
         };
 
-        if (request.MediaFile != null)
-        {
-            var metaData = await _storageService.AddFileAsync(request.MediaFile);
+        // if (request.MediaFile != null)
+        // {
+        //     var metaData = await _storageService.AddFileAsync(request.MediaFile);
 
-            productImage.ImageId = Guid.CreateVersion7();
-            productImage.Image = new Image
-            {
-                BaseUrl = metaData.BaseUrl,
-                FileName = $"{metaData.Path}/{metaData.Name}",
-                AllText = $"seo all text - {request.ProductId}"
-            };
-        }
+        //     productImage.ImageId = Guid.CreateVersion7();
+        //     productImage.Image = new Image
+        //     {
+        //         BaseUrl = metaData.BaseUrl,
+        //         FileName = $"{metaData.Path}/{metaData.Name}",
+        //         AllText = $"seo all text - {request.ProductId}"
+        //     };
+        // }
 
         product.AddImage(productImage);
 

@@ -15,7 +15,7 @@ public static class Extensions
 {
     public static WebApplicationBuilder AddApplicationServices(this WebApplicationBuilder builder)
     {
-        builder.AddNpgsqlDbContext<IdentityContext>("shopdb");
+        builder.AddNpgsqlDbContext<IdentityContext>("EShopDb");
 
         // Configure Identity
         builder.Services.AddIdentity<User, Role>(config =>

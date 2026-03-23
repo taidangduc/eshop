@@ -10,7 +10,7 @@ namespace EShop.Api;
 
 public static class HostingExtensions
 {
-    public static WebApplicationBuilder AddPersistence(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddHosting(this WebApplicationBuilder builder)
     {
         builder.Services.Configure<ForwardedHeadersOptions>(options =>
         {
@@ -58,7 +58,7 @@ public static class HostingExtensions
         return builder;
     }
 
-    public static WebApplication MapPersistence(this WebApplication app)
+    public static WebApplication MapHosting(this WebApplication app)
     {
         app.UseForwardedHeaders();
 

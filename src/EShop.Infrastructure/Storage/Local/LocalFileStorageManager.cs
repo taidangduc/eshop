@@ -1,4 +1,6 @@
-namespace EShop.Infrastructure.ExternalServices.Storage.Local;
+using EShop.Domain.Infrastructure.Storage;
+
+namespace EShop.Infrastructure.Storage;
 
 public class LocalFileStorageManager : IFileStorageManager
 {
@@ -7,6 +9,12 @@ public class LocalFileStorageManager : IFileStorageManager
     public LocalFileStorageManager(LocalOptions options)
     {
         _options = options;
+    }
+
+    public string GetFileUrl(IFileEntry fileEntry)
+    {
+        var filePath = Path.Combine(_options.Path, fileEntry.FileLocation);
+        return filePath;
     }
 
     public async Task CreateAsync(IFileEntry fileEntry, Stream stream, CancellationToken cancellationToken = default)
@@ -18,9 +26,9 @@ public class LocalFileStorageManager : IFileStorageManager
         if (!Directory.Exists(folder))
         {
             Directory.CreateDirectory(folder);
-        }   
+        }
 
-        using(var fileStream = File.Create(filePath))
+        using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
         {
             await stream.CopyToAsync(fileStream, cancellationToken);
         }
@@ -30,16 +38,11 @@ public class LocalFileStorageManager : IFileStorageManager
     {
         await Task.Run(() =>
         {
-            var filePath = Path.Combine(_options.Path, fileEntry.FileLocation);
-            if (File.Exists(filePath))
+            var path = Path.Combine(_options.Path, fileEntry.FileLocation);
+            if (File.Exists(path))
             {
-                File.Delete(filePath);
+                File.Delete(path);
             }
         }, cancellationToken);
-    }
-
-    public Task<byte[]> ReadAsync(IFileEntry fileEntry, CancellationToken cancellationToken = default)
-    {
-        return File.ReadAllBytesAsync(Path.Combine(_options.Path, fileEntry.FileLocation), cancellationToken);
     }
 }

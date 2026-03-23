@@ -11,10 +11,8 @@ using EShop.Infrastructure.ExternalServices.Notifications.Email;
 using EShop.Infrastructure.ExternalServices.Payment;
 using EShop.Infrastructure.ExternalServices.Payment.Vnpay;
 using EShop.Infrastructure.ExternalServices.Payment.Stripe;
-using EShop.Infrastructure.ExternalServices.Storage;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using EShop.Outbox.EF.Extensions;
 using EShop.Outbox.EF.Infrastructure.Data;
 using EShop.Shared.Constants;
@@ -37,13 +35,12 @@ public static class DependencyInjection
         builder.Services.AddSingleton(appSettings);
 
         // Add Persistence Layer
-        builder.AddPersistence();
+        //builder.AddPersistence();
 
         // External Services
         builder.Services.AddTransient<IEmailService, SmtpEmailSender>();
-        builder.Services.AddScoped<IFileService, LocalStorage>();
+        //builder.Services.AddScoped<IFileService, LocalStorage>();
                
-
         builder.Services.AddScoped<IPaymentGateway, VnpayPaymentGateway>();
         builder.Services.AddScoped<IPaymentGateway, StripePaymentGateway>();
         builder.Services.AddScoped<IPaymentGatewayFactory, PaymentGatewayFactory>();
@@ -71,7 +68,7 @@ public static class DependencyInjection
            .AddSubscription<ReserveStockSucceededIntegrationEvent, ReserveStockSucceededIntegrationEventHandler>()
            .AddSubscription<UserCreatedIntegrationEvent, UserCreatedIntegrationEventHandler>();
         }
-        builder.AddTransactionalOutbox();
+        builder.AddTransactionalOutbox();     
 
         return builder;
     }

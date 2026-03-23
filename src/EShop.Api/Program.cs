@@ -1,20 +1,34 @@
 using EShop.Api;
+using EShop.Api.ConfigurationOptions;
 using EShop.Api.Endpoints;
 using EShop.Application;
 using EShop.Infrastructure;
+using EShop.Infrastructure.Storage;
+using EShop.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
+var configuration = builder.Configuration;
+var services = builder.Services;
+
+var appSettings = new AppSettings();
+configuration.Bind(appSettings);
+
+services.Configure<AppSettings>(configuration);
 
 builder.AddServiceDefaults();
 
-builder.AddApplicationServices();
-builder.AddInfrastructure();
-builder.AddPersistence();
+builder
+.AddApplicationServices()
+.AddInfrastructure()
+.AddHosting()
+.AddPersistence(appSettings.ConnectionStrings.EShopDb);
+
+services.AddStorage(appSettings.Storage);
 
 var app = builder.Build();
 
 app.MapInfrastructure();
-app.MapPersistence();
+app.MapHosting();
 
 app.MapCatalogApi();
 app.MapBasketApi();

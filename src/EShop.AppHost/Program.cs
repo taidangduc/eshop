@@ -8,7 +8,7 @@ var rabbitmq = builder.AddRabbitMQ("rabbitmq");
 
 var postgres = builder.AddPostgres("postgres").WithPgWeb();
 
-var database = postgres.AddDatabase("shopdb");
+var database = postgres.AddDatabase("EShopDb");
 
 var apiService = builder.AddProject<Projects.EShop_Api>("apiservice")
     .WithExternalHttpEndpoints()
