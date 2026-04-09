@@ -23,7 +23,7 @@ public static class Extensions
         // Swagger UI docs
         app.UseSwaggerUI(options =>
         {
-            options.RoutePrefix = "swagger";
+            options.RoutePrefix = string.Empty;
             var openApiUrl = "/openapi/v1.json";
             var name = "Open API";
 

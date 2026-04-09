@@ -1,5 +1,5 @@
 import fallbackImage from "@/public/default.jpg";
-import { useAuth } from "@/features/identity/hooks/useAuth";
+import { useAuth } from "@features/auth/useAuth";
 
 export default function NavBar() {
   const { user, isAuthenticated, login, logout, isLoading } = useAuth();

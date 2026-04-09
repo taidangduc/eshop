@@ -1,11 +1,19 @@
-export { default as Checkbox } from './Checkbox/Checkbox';
-export { PageLoading } from './Loading/PageLoading';
-export { default as Modal } from './Modal/Modal';
-export { Pagination } from './Pagination/Pagination';
-export { default as RadioGroup } from './RadioGroup/RadioGroup';
-export { Skeleton } from './Skeleton/Skeleton';
-export { CardSkeleton } from './Skeleton/CardSkeleton';
-export { TextSkeleton } from './Skeleton/TextSkeleton';
-export { AvatarSkeleton as AvatarSkeleton } from './Skeleton/AvatarSkeleton';
-export { TextField } from './TextField/TextField';
-export { Table, TableHeader, TableHeaderCell, TableBody, TableRow, TableCell } from './Table';
+export { default as Checkbox } from "./Checkbox/Checkbox";
+export { PageLoading } from "./Loading/PageLoading";
+export { default as Modal } from "./Modal/Modal";
+export { Pagination } from "./Pagination/Pagination";
+export { default as RadioGroup } from "./RadioGroup/RadioGroup";
+export { Skeleton } from "./Skeleton/Skeleton";
+export { CardSkeleton } from "./Skeleton/CardSkeleton";
+export { TextSkeleton } from "./Skeleton/TextSkeleton";
+export { AvatarSkeleton as AvatarSkeleton } from "./Skeleton/AvatarSkeleton";
+export { TextField } from "./TextField/TextField";
+export {
+  Table,
+  TableHeader,
+  TableHeaderCell,
+  TableBody,
+  TableRow,
+  TableCell,
+} from "./Table";
+export { Image } from './Image/Image'

@@ -1,4 +1,3 @@
-using EShop.Application.Abstractions;
 using EShop.Domain.SeedWork;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -8,11 +7,6 @@ namespace EShop.Persistence.Interceptors;
 // ref: https://learn.microsoft.com/en-us/ef/core/logging-events-diagnostics/interceptors
 public class AuditableEntityInterceptor : SaveChangesInterceptor
 {
-    public AuditableEntityInterceptor(ICurrentUserProvider currentUser)
-    {
-
-    }
-
     public override InterceptionResult<int> SavingChanges(DbContextEventData eventData, InterceptionResult<int> result)
     {
         OnBeforeSaving(eventData.Context);
@@ -27,17 +21,15 @@ public class AuditableEntityInterceptor : SaveChangesInterceptor
         return base.SavingChangesAsync(eventData, result, cancellationToken);
     }
 
-    // ref: https://www.meziantou.net/entity-framework-core-generate-tracking-columns.htm
-    // ref: https://www.meziantou.net/entity-framework-core-soft-delete-using-query-filters.htm
     public void OnBeforeSaving(DbContext? context)
     {
         try
         {
-            if (context == null) return;
+            if (context is null) return;
 
-            foreach (var entry in context.ChangeTracker.Entries<IAggregate>())
+            foreach (var entry in context.ChangeTracker.Entries<IAuditableEntity>())
             {
-                var isAuditable = entry.Entity.GetType().IsAssignableTo(typeof(IAggregate));
+                var isAuditable = entry.Entity.GetType().IsAssignableTo(typeof(IAuditableEntity));
 
                 if (isAuditable)
                 {
@@ -58,11 +50,10 @@ public class AuditableEntityInterceptor : SaveChangesInterceptor
                     }
                 }
             }
-
         }
         catch (Exception ex)
         {
-            throw new Exception("try for find IAggregate", ex);
+            throw new Exception("Error while setting auditable entity properties.", ex);
         }
     }
 }

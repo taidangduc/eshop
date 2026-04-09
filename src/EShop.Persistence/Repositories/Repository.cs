@@ -4,20 +4,15 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EShop.Persistence.Repositories;
 
-public class Repository<TEntity, TKey> : IRepository<TEntity, TKey> where TEntity : Entity<TKey>
+public class Repository<TEntity, TKey> : IRepository<TEntity, TKey>
+    where TEntity : Entity<TKey>, IAggregateRoot
 {
-    private readonly ApplicationDbContext _dbContext;
+    private readonly EShopDbContext _dbContext;
     protected DbSet<TEntity> DbSet => _dbContext.Set<TEntity>();
 
-    public IUnitOfWork UnitOfWork
-    {
-        get
-        {
-            return _dbContext;
-        }
-    }
+    public IUnitOfWork UnitOfWork => _dbContext;
 
-    public Repository(ApplicationDbContext dbContext)
+    public Repository(EShopDbContext dbContext)
     {
         _dbContext = dbContext;
     }
@@ -29,10 +24,20 @@ public class Repository<TEntity, TKey> : IRepository<TEntity, TKey> where TEntit
 
     public Task AddOrUpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
-        throw new NotImplementedException();
+        if (entity.Id.Equals(default(TKey)))
+        {
+            return AddAsync(entity, cancellationToken);
+        }
+        else
+        {
+            return UpdateAsync(entity, cancellationToken);
+        }
     }
+
     public Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
+        //_dbContext.Update(entity).State = EntityState.Modified;
+
         return Task.CompletedTask;
     }
 

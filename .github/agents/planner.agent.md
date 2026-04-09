@@ -1,7 +1,7 @@
 ---
 name: Planner
 description: 'Generate an implematation plan for new features or refactoring existing code.'
-tools: [search/codebase, web/fetch, web/githubRepo, search, search/usages]
+tools: [search/codebase, web/fetch, search, search/usages]
 model: GPT-5.1-Codex-Mini (Preview) (copilot)
 handoffs: 
   - label: Implement CSharp Changes

@@ -1,11 +1,11 @@
-using EShop.IdentityService.Infrastructure.Entity;
+using EShop.IdentityService.Entities;
 using EShop.IdentityService.Models.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Duende.IdentityServer.Services;
-using EShop.EventBus.Abstractions;
 using EShop.Contracts.IntegrationEvents;
+using EShop.EventBus;
 
 namespace EShop.IdentityService.Controllers;
 
@@ -13,41 +13,26 @@ public class AccountController : Controller
 {
     private readonly UserManager<User> _userManager;
     private readonly SignInManager<User> _signInManager;
-    /* NEW v2: Add IIdentityServerInteractionService for Duende logout */
     private readonly IIdentityServerInteractionService _interaction;
-    private readonly IEventPublisher _eventPublisher;
+    private readonly IEventBus _eventBus;
 
-
-    /* OLD v1: Constructor without IIdentityServerInteractionService
-    public AccountController(
-        UserManager<User> userManager,
-        SignInManager<User> signInManager)
-        //IEventPublisher eventPublisher)
-    {
-        _userManager = userManager;
-        _signInManager = signInManager;
-        //_eventPublisher = eventPublisher;
-    }
-    */
-
-    /* NEW v2: Constructor with IIdentityServerInteractionService */
     public AccountController(
         UserManager<User> userManager,
         SignInManager<User> signInManager,
         IIdentityServerInteractionService interaction,
-        IEventPublisher eventPublisher)
+        IEventBus eventBus)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _interaction = interaction;
-        _eventPublisher = eventPublisher;
+        _eventBus = eventBus;
     }
 
     [HttpGet]
     [AllowAnonymous]
     public IActionResult Login(string returnUrl = null)
     {
-        if(User.Identity.IsAuthenticated)
+        if (User.Identity.IsAuthenticated)
         {
             return RedirectToLocal(returnUrl);
         }
@@ -74,48 +59,25 @@ public class AccountController : Controller
 
         var user = await _userManager.FindByNameAsync(model.UserName);
 
+        if (user == null)
+        {
+            return View(model);
+        }
+
         var result = await _signInManager.PasswordSignInAsync(model.UserName, model.Password, isPersistent: false, lockoutOnFailure: false);
 
         if (result.Succeeded)
         {
+            if(string.IsNullOrEmpty(model.ReturnUrl))
+            {
+                return Redirect("http://localhost:3000/");
+            }
             return RedirectToLocal(model.ReturnUrl);
         }
 
         return View(model);
     }
 
-    /* OLD v1: Simple logout without Duende IdentityServer interaction
-    [HttpGet]
-    public async Task<IActionResult> Logout(LogoutModel model)
-    {
-        //await _signInManager.SignOutAsync();
-        //return RedirectToAction(nameof(HomeController.Index), "Home");
-
-        await _signInManager.SignOutAsync();
-        return Redirect("~/");
-    }
-    */
-
-    /* OLD v2: Logout GET - Show logout confirmation page
-    [HttpGet]
-    public async Task<IActionResult> Logout(string? logoutId)
-    {
-        // Build a model so the logout page knows what to display
-        var model = new LogoutModel { LogoutId = logoutId };
-
-        if (User?.Identity?.IsAuthenticated != true)
-        {
-            // if the user is not authenticated, then just show logged out page
-            return await Logout(model);
-        }
-
-        // Show the logout prompt. This prevents attacks where the user
-        // is automatically signed out by another malicious web page.
-        return View(model);
-    }
-    */
-
-    /* NEW v3: Logout GET - Silent logout without confirmation UI */
     [HttpGet]
     public async Task<IActionResult> Logout(string? logoutId)
     {
@@ -141,32 +103,6 @@ public class AccountController : Controller
         return Redirect(postLogoutRedirectUri);
     }
 
-    /* OLD v2: Logout POST - Perform actual logout
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Logout(LogoutModel model)
-    {
-        // Get the logout context
-        var logout = await _interaction.GetLogoutContextAsync(model.LogoutId);
-
-        // Sign out from ASP.NET Identity
-        await _signInManager.SignOutAsync();
-
-        // Determine the post logout redirect URI
-        var postLogoutRedirectUri = logout?.PostLogoutRedirectUri;
-
-        // If no post logout redirect URI, default to SPA
-        if (string.IsNullOrEmpty(postLogoutRedirectUri))
-        {
-            postLogoutRedirectUri = "http://localhost:3000/";
-        }
-
-        // Return to the post logout redirect URI
-        return Redirect(postLogoutRedirectUri);
-    }
-    */
-
-    /* NEW v3: Logout POST - Keep for compatibility but redirect to GET */
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout(LogoutModel model)
@@ -208,7 +144,7 @@ public class AccountController : Controller
             return View();
         }
 
-        await _eventPublisher.PublishAsync(new UserCreatedIntegrationEvent
+        await _eventBus.SendAsync(new UserCreatedEvent
         {
             UserId = user.Id,
             Email = user.Email

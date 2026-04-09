@@ -77,7 +77,6 @@ builder.Services.AddAuthentication(options =>
 
     options.MapInboundClaims = false;
 
-    /* NEW v2: Configure OpenIdConnect events for proper logout handling */
     options.Events = new OpenIdConnectEvents
     {
         OnRedirectToIdentityProviderForSignOut = context =>

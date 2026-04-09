@@ -4,14 +4,25 @@ namespace EShop.Domain.Entities;
 
 public class ProductOption : Entity<Guid>
 {
-    //public Guid Id { get; set; }
     public Guid ProductId { get; set; }
-    public string Name { get; set; } = default!;
-    public bool AllowImage { get; set; }
-    public List<OptionValue> Values { get; set; } = [];
+    public string Name { get; set; }
+    public bool HasImage { get; set; }
+    private readonly List<ProductOptionValue> _values = new();
+    public IReadOnlyCollection<ProductOptionValue> Values => _values.AsReadOnly();
 
-    public void AddValue(OptionValue value)
+    public void AddValue(string value, string? fileLocation = null)
     {
-        Values.Add(value);
+        _values.Add(new ProductOptionValue(Id, value, fileLocation));
+    }
+
+    public void RemoveValue(Guid valueId)
+    {
+        var value = _values.FirstOrDefault(v => v.Id == valueId);
+        if (value is null)
+        {
+            throw new InvalidOperationException($"Option value with ID {valueId} not found.");
+        }
+
+        _values.Remove(value);
     }
 }

@@ -4,25 +4,9 @@
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var rabbitmq = builder.AddRabbitMQ("rabbitmq");
-
-var postgres = builder.AddPostgres("postgres").WithPgWeb();
-
-var database = postgres.AddDatabase("EShopDb");
-
-var apiService = builder.AddProject<Projects.EShop_Api>("apiservice")
-    .WithExternalHttpEndpoints()
-    .WithReference(database)
-    .WithReference(rabbitmq)
-    .WaitFor(database)
-    .WaitFor(rabbitmq);
+var apiService = builder.AddProject<Projects.EShop_Api>("apiservice");
 
 var identityService = builder.AddProject<Projects.EShop_IdentityService>("identityservice")
-    .WithExternalHttpEndpoints()
-    .WithReference(database)
-    .WithReference(rabbitmq)
-    .WaitFor(database)
-    .WaitFor(rabbitmq)
     .WaitFor(apiService);
 
 // test / dev local frontend with react and vite

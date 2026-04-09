@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace EShop.Application.Common.Services;
 
-public class CrudService<T> : ICrudService<T> where T : Entity<Guid>
+public class CrudService<T> : ICrudService<T> where T : Entity<Guid>, IAggregateRoot
 {
     private readonly IUnitOfWork _unitOfWork;
     protected readonly IRepository<T, Guid> _repository;

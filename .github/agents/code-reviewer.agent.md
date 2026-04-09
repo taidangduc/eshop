@@ -1,7 +1,7 @@
 ---
 name: Code-Reviewer
 description: 'Review code changes for quality, security, and best practices compliance.'
-tools: [search/codebase, web/githubRepo, search, search/usages]
+tools: [search/codebase, search, search/usages]
 model: Gemini 2.5 Flash Preview (gemini)
 handoffs: 
   - label: Fix Issues Found

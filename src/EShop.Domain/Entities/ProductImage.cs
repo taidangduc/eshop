@@ -1,14 +1,11 @@
-using System.Text.Json.Serialization;
+using EShop.Domain.SeedWork;
 
 namespace EShop.Domain.Entities;
 
-public class ProductImage
+public class ProductImage : Entity<Guid>
 {
-    public Guid Id { get; set; }
     public Guid ProductId { get; set; }
-    public Guid ImageId { get; set; }
     public bool IsMain { get; set; }
+    public string? ImageUrl { get; set; }
     public int SortOrder { get; set; }
-    [JsonIgnore]
-    public Image Image { get; set; } = default!;
 }

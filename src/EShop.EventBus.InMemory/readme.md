@@ -1,1 +1,0 @@
-InMemory is vitural eventbus, only work with apps same process

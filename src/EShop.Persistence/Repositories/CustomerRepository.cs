@@ -5,8 +5,7 @@ namespace EShop.Persistence.Repositories;
 
 public class CustomerRepository : Repository<Customer, Guid>, ICustomerRepository
 {
-    public CustomerRepository(ApplicationDbContext dbContext) : base(dbContext)
+    public CustomerRepository(EShopDbContext dbContext) : base(dbContext)
     {
-
     }
 }

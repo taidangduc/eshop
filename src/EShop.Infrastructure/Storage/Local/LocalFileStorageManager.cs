@@ -34,6 +34,23 @@ public class LocalFileStorageManager : IFileStorageManager
         }
     }
 
+    public async Task CreateAsync(IFileEntry fileEntry, Stream stream, string? contentType, CancellationToken cancellationToken = default)
+    {
+        var filePath = Path.Combine(_options.Path, fileEntry.FileLocation);
+
+        var folder = Path.GetDirectoryName(filePath);
+
+        if (!Directory.Exists(folder))
+        {
+            Directory.CreateDirectory(folder);
+        }
+
+        using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
+        {
+            await stream.CopyToAsync(fileStream, cancellationToken);
+        }
+    }
+
     public async Task DeleteAsync(IFileEntry fileEntry, CancellationToken cancellationToken = default)
     {
         await Task.Run(() =>

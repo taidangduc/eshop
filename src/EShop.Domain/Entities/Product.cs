@@ -1,164 +1,137 @@
+using EShop.Domain.Enums;
+using EShop.Domain.Events;
 using EShop.Domain.SeedWork;
 
 namespace EShop.Domain.Entities;
 
-public class Product : Aggregate<Guid>
+public class Product : AuditableEntity<Guid>, IAggregateRoot, ISoftDelete
 {
-    public string Name { get; set; } = default!;
-    public string UrlSlug { get; set; } = default!;
-    public string Description { get; set; } = default!;
-    public bool IsActive { get; set; }
+    public string Title { get; set; }
+    public string Description { get; set; }
+    public Guid CategoryId { get; set; }
+    public ProductStatus Status { get; set; }
     public bool IsDeleted { get; set; }
-    public Guid CategoryId { get; set; } = default!;
-    public Category Category { get; set; } = default!;
-    public List<ProductImage> Images { get; set; } = [];
-    public List<ProductOption> Options { get; set; } = [];
-    public List<Variant> Variants { get; set; } = [];
+    private readonly List<ProductImage> _images = new();
+    private readonly List<ProductOption> _options = new();
+    public IReadOnlyCollection<ProductImage> Images => _images.AsReadOnly();
+    public IReadOnlyCollection<ProductOption> Options => _options.AsReadOnly();
 
-    public void AddOption(ProductOption productOption)
+    public void AddOption(string name, bool hasImage)
     {
-        if (Options.Any(o => o.AllowImage) && productOption.AllowImage)
+        if (_options.Any(o => o.HasImage) && hasImage)
         {
             throw new InvalidOperationException("Only one product option can allow images per product.");
         }
-        Options.Add(productOption);
+
+        _options.Add(new ProductOption
+        {
+            Name = name,
+            HasImage = hasImage
+        });
     }
 
     public void RemoveOption(Guid optionId)
     {
-        var option = Options.FirstOrDefault(o => o.Id == optionId);
-        if (option == null)
+        var option = _options.FirstOrDefault(o => o.Id == optionId);
+        if (option is null)
         {
             throw new InvalidOperationException($"Option with ID {optionId} not found.");
         }
-        Options.Remove(option);
+
+        var imageList = option.Values.Where(v => v.ImageUrl is not null).Select(v => v.ImageUrl).ToList();
+
+        _options.Remove(option);
+
+        foreach (var imageUrl in imageList)
+        {
+            AddDomainEvent(new FileEntryDeletedDomainEvent(imageUrl));
+        }
     }
 
-    public void AddOptionValue(Guid optionId, OptionValue optionValue, Image? image = null)
+    public void AddOptionValue(Guid optionId, string value, string? fileLocation = null)
     {
-        var option = Options.FirstOrDefault(o => o.Id == optionId);
-        if (option == null)
+        var option = _options.FirstOrDefault(o => o.Id == optionId);
+        if (option is null)
         {
             throw new InvalidOperationException($"Option with ID {optionId} not found.");
         }
 
-        if (!option.AllowImage && image != null)
+        if (!option.HasImage && fileLocation is not null)
         {
             throw new InvalidOperationException("Product option does not allow images.");
         }
 
-        if (image != null)
-        {
-            optionValue.ImageId = image.Id;
-            optionValue.Image = image;
-        }
-
-        option.AddValue(optionValue);
+        option.AddValue(value, fileLocation);
     }
 
     public void RemoveOptionValue(Guid optionId, Guid optionValueId)
     {
-        var option = Options.FirstOrDefault(o => o.Id == optionId);
-        if (option == null)
+        var option = _options.FirstOrDefault(o => o.Id == optionId);
+        if (option is null)
         {
             throw new InvalidOperationException($"Option with ID {optionId} not found.");
         }
-
         var value = option.Values.FirstOrDefault(v => v.Id == optionValueId);
-        if (value == null)
+        if (value is null)
         {
             throw new InvalidOperationException($"Option value with ID {optionValueId} not found.");
         }
 
-        option.Values.Remove(value);
+        option.RemoveValue(optionValueId);
+
+        if (option.HasImage && value.ImageUrl is not null)
+        {
+            AddDomainEvent(new FileEntryDeletedDomainEvent(value.ImageUrl));
+        }
+
     }
 
-    public void AddVariant(Variant variant)
+    public void AddImage(bool isMain, int sortOrder, string fileLocation)
     {
-        Variants.Add(variant);
-    }
-
-    public void RemoveVariant(Guid variantId)
-    {
-        var variant = Variants.FirstOrDefault(v => v.Id == variantId);
-        if (variant == null)
-        {
-            throw new InvalidOperationException($"Variant with ID {variantId} not found.");
-        }
-        Variants.Remove(variant);
-    }
-
-    public void UpdateVariant(Guid variantId, decimal? price = null, int? quantity = null, string? sku = null, bool? isActive = null)
-    {
-        var variant = Variants.FirstOrDefault(v => v.Id == variantId);
-        if (variant == null)
-        {
-            throw new InvalidOperationException($"Variant with ID {variantId} not found.");
-        }
-
-        if (price.HasValue)
-        {
-            variant.Price = price.Value;
-        }
-
-        if (quantity.HasValue)
-        {
-            if (quantity.Value < 0)
-            {
-                throw new ArgumentException("Quantity cannot be negative.", nameof(quantity));
-            }
-            variant.Quantity = quantity.Value;
-        }
-
-        if (!string.IsNullOrWhiteSpace(sku))
-        {
-            variant.Sku = sku;
-        }
-
-        if (isActive.HasValue)
-        {
-            variant.IsActive = isActive.Value;
-        }
-
-        variant.UpdatedAt = DateTime.UtcNow;
-    }
-
-    public void BulkUpdateVariants(decimal? price = null, int? quantity = null, string? sku = null, bool? isActive = null)
-    {
-        foreach (var variant in Variants)
-        {
-            if (price.HasValue) variant.Price = price.Value;
-            if (quantity.HasValue) variant.Quantity = quantity.Value;
-            if (!string.IsNullOrWhiteSpace(sku)) variant.Sku = sku;
-            if (isActive.HasValue) variant.IsActive = isActive.Value;
-            variant.UpdatedAt = DateTime.UtcNow;
-        }
-    }
-
-    public void AddImage(ProductImage productImage)
-    {
-        if (productImage.IsMain && Images.Any(i => i.IsMain))
+        if (isMain && _images.Any(i => i.IsMain))
         {
             throw new InvalidOperationException("Only one main image is allowed per product.");
         }
-        Images.Add(productImage);
+
+        _images.Add(new ProductImage
+        {
+            IsMain = isMain,
+            SortOrder = sortOrder,
+            ImageUrl = fileLocation
+        });
     }
 
     public void RemoveImage(Guid imageId)
     {
-        var image = Images.FirstOrDefault(i => i.Id == imageId);
-        if (image == null)
+        var image = _images.FirstOrDefault(i => i.Id == imageId);
+        if (image is null)
         {
             throw new InvalidOperationException($"Image with ID {imageId} not found.");
         }
-        Images.Remove(image);
+        _images.Remove(image);
+
+        AddDomainEvent(new FileEntryDeletedDomainEvent(image.ImageUrl));
     }
 
-    public void Update(string? name = null, string? description = null, Guid? categoryId = null)
+    public static Product Create(string title, string description, Guid categoryId)
     {
-        if (!string.IsNullOrWhiteSpace(name))
+        var product = new Product
         {
-            Name = name;
+            Id = Guid.CreateVersion7(),
+            Title = title,
+            Description = description,
+            CategoryId = categoryId,
+            Status = ProductStatus.Published,
+        };
+
+        return product;
+    }
+
+    public void Update(string? title = null, string? description = null, Guid? categoryId = null)
+    {
+        if (!string.IsNullOrWhiteSpace(title))
+        {
+            Title = title;
         }
 
         if (!string.IsNullOrWhiteSpace(description))
@@ -172,17 +145,7 @@ public class Product : Aggregate<Guid>
         }
     }
 
-    public void Activate()
-    {
-        IsActive = true;
-    }
-
-    public void Deactivate()
-    {
-        IsActive = false;
-    }
-
-    public void MarkAsDeleted()
+    public void Delete()
     {
         IsDeleted = true;
     }

@@ -1,21 +1,24 @@
 using Duende.IdentityServer;
-using EShop.EventBus.Abstractions;
-using EShop.EventBus.RabbitMQ;
+using EShop.Contracts.IntegrationEvents;
+using EShop.IdentityService.ConfigurationOptions;
 using EShop.IdentityService.ConfigurationOptions.ExternalLogin;
 using EShop.IdentityService.Configurations;
-using EShop.IdentityService.Infrastructure.Data;
-using EShop.IdentityService.Infrastructure.Entity;
-using EShop.IdentityService.Infrastructure.Seed;
+using EShop.IdentityService.Entities;
 using Microsoft.AspNetCore.Identity;
+using EShop.EventBus;
+using EShop.EventBus.RabbitMQ;
+using System.Reflection;
+using EShop.IdentityService.Persistence;
 using EShop.Migrator;
+using EShop.IdentityService.Persistence.Seed;
 
 namespace EShop.IdentityService.Extensions;
 
 public static class Extensions
 {
-    public static WebApplicationBuilder AddApplicationServices(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddApplicationServices(this WebApplicationBuilder builder, AppSettings appSettings)
     {
-        builder.AddNpgsqlDbContext<IdentityContext>("EShopDb");
+        builder.AddNpgsqlDbContext<IdentityDbContext>("EShopDb");
 
         // Configure Identity
         builder.Services.AddIdentity<User, Role>(config =>
@@ -25,7 +28,7 @@ public static class Extensions
             config.Password.RequireNonAlphanumeric = false;
             config.Password.RequireUppercase = false;
         })
-        .AddEntityFrameworkStores<IdentityContext>()
+        .AddEntityFrameworkStores<IdentityDbContext>()
         .AddDefaultTokenProviders();
 
         // Configure IdentityServer
@@ -39,10 +42,10 @@ public static class Extensions
             // see https://docs.duendesoftware.com/identityserver/v6/fundamentals/resources/
             options.EmitStaticAudienceClaim = true;
         })
-        .AddInMemoryIdentityResources(Config.IdentityResources)
-        .AddInMemoryApiScopes(Config.ApiScopes)
-        .AddInMemoryApiResources(Config.ApiResources)
-        .AddInMemoryClients(Config.Clients)
+        .AddInMemoryIdentityResources(DuendeConfigurations.IdentityResources)
+        .AddInMemoryApiScopes(DuendeConfigurations.ApiScopes)
+        .AddInMemoryApiResources(DuendeConfigurations.ApiResources)
+        .AddInMemoryClients(DuendeConfigurations.Clients)
         .AddAspNetIdentity<User>();
 
         if (builder.Environment.IsDevelopment()) identityServerBuilder.AddDeveloperSigningCredential();
@@ -79,15 +82,10 @@ public static class Extensions
             });
         }
 
-        builder.Services.AddScoped<IDataSeeder<IdentityContext>, DataSeeder>();
+        builder.Services.AddScoped<IDataSeeder<IdentityDbContext>, IdentityDataSeeder>();
 
-        if (builder.Environment.EnvironmentName == "test")
-        {
-            builder.Services.AddTransient<IEventPublisher, NullEventPublisher>();
-        }
-        {
-            builder.AddRabbitMqEventBus("rabbitmq");
-        }
+        builder.Services.AddEventBus(Assembly.GetExecutingAssembly());
+        builder.Services.AddRabbitMQSender<UserCreatedEvent>(appSettings.RabbitMQ);
 
         return builder;
     }

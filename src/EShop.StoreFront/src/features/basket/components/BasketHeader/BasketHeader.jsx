@@ -1,6 +1,6 @@
 import styles from './BasketHeader.module.css';
 
-export default function BasketHeader() {
+export function BasketHeader() {
   return (
      <div className={styles.container}>
       <div className={`${styles['container-wrapper']} mx-auto`}>

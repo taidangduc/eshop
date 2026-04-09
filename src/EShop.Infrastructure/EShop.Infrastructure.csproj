@@ -7,12 +7,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Messaing\**" />
-    <EmbeddedResource Remove="Messaing\**" />
-    <None Remove="Messaing\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Ardalis.Specification.EntityFrameworkCore" Version="9.2.0" />
     <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.0.2" />
     <PackageReference Include="AspNetCore.HealthChecks.NpgSql" Version="9.0.0" />
@@ -36,14 +30,11 @@
   <ItemGroup>
     <ProjectReference Include="..\EShop.Application\EShop.Application.csproj" />
     <ProjectReference Include="..\EShop.EventBus.RabbitMQ\EShop.EventBus.RabbitMQ.csproj" />
-    <ProjectReference Include="..\EShop.Outbox.EF\EShop.Outbox.EF.csproj" />
     <ProjectReference Include="..\EShop.Persistence\EShop.Persistence.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Logging\" />
     <Folder Include="Identity\" />
-    <Folder Include="Web\" />
   </ItemGroup>
 
 </Project>

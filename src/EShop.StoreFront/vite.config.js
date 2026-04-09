@@ -40,6 +40,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": p.resolve(__dirname, "./src"),
+        "@pages": p.resolve(__dirname, "src/pages"),
         "@app": p.resolve(__dirname, "src/app"),
         "@features": p.resolve(__dirname, "src/features"),
         "@shared": p.resolve(__dirname, "src/shared"),

@@ -5,13 +5,13 @@ using EShop.Domain.ValueObject;
 
 namespace EShop.Domain.Entities;
 
-public class Order : Aggregate<Guid>
+public class Order : AuditableEntity<Guid>, IAggregateRoot
 {
-    public long OrderNumber { get; set; } // for payment
+    public long OrderNumber { get; set; }
     public Guid CustomerId { get; init; }
     public OrderStatus Status { get; private set; }
-    public Money TotalAmount { get; private set; } = default!;
-    public Address ShippingAddress { get; private set; } = default!;
+    public Money TotalAmount { get; private set; }
+    public Address ShippingAddress { get; private set; }
     public PaymentMethod PaymentMethod { get; set; }
     public PaymentProvider PaymentProvider { get; set; }
     public string? CardBrand { get; set; }
@@ -22,8 +22,8 @@ public class Order : Aggregate<Guid>
     public static Order Create(Guid orderId, long OrderNumber, Guid customerId, Address shippingAddress,
         List<OrderItem> items, Money totalAmount, PaymentMethod method, PaymentProvider provider)
     {
-        var order = new Order 
-        { 
+        var order = new Order
+        {
             Id = orderId,
             OrderNumber = OrderNumber,
             CustomerId = customerId,
@@ -58,11 +58,11 @@ public class Order : Aggregate<Guid>
 
     public void SetCancelledStatus()
     {
-        if(Status == OrderStatus.Pending)
-        {
-            throw new Exception("Can't cancel while order processing");
-        }
-        // description / reason
+        // if (Status == OrderStatus.Pending)
+        // {
+        //     throw new Exception("Can't cancel while order processing");
+        // }
+
         Status = OrderStatus.Cancelled;
         AddDomainEvent(new OrderCancelledDomainEvent(Id));
     }
@@ -73,7 +73,7 @@ public class Order : Aggregate<Guid>
         {
             throw new Exception("Can't cancel while order processing");
         }
-        // description / reason
+
         Status = OrderStatus.Rejected;
         AddDomainEvent(new OrderRejectedDomainEvent(Id));
     }
@@ -84,7 +84,7 @@ public class Order : Aggregate<Guid>
         {
             throw new Exception("Can't cancel while order processing");
         }
-        // description / reason
+
         Status = OrderStatus.Rejected;
         AddDomainEvent(new OrderRejectedDomainEvent(Id));
     }

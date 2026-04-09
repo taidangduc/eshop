@@ -1,9 +1,11 @@
 namespace EShop.Domain.SeedWork;
 
-public abstract class Entity<TKey> : IEntity<TKey>
+public abstract class Entity : HasDomainEvent
 {
-    public TKey Id { get; set; }
-    public DateTime? CreatedAt { get; set; }
-    public DateTime? UpdatedAt { get; set; }
-    public long Version { get; set; }
+    public Guid Id { get; set; }
+}
+
+public abstract class Entity<TKey> : Entity
+{
+    public new TKey Id { get; set; }
 }

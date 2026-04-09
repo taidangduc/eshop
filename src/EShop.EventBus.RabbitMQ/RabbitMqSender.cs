@@ -1,65 +1,48 @@
-using EShop.EventBus.Abstractions;
-using EShop.EventBus.Events;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using System.Text;
 using System.Text.Json;
 
 namespace EShop.EventBus.RabbitMQ;
 
-public sealed class RabbitMqSender : IEventPublisher
+public sealed class RabbitMQSender<T> : IEventBusProducer<T>
 {
-    private readonly RabbitMqOptions _options;
-    private readonly ILogger<RabbitMqSender> _logger;
-    private IConnection _connection;
+    private readonly RabbitMQSenderOptions _options;
+    private readonly ConnectionFactory _connectionFactory;
+    private readonly string _exchangeName;
+    private readonly string _routingKey;
 
-    public RabbitMqSender(
-        IConnection connection,
-        IOptions<RabbitMqOptions> options,
-        ILogger<RabbitMqSender> logger)
+    public RabbitMQSender(RabbitMQSenderOptions options)
     {
-        _connection = connection;
-        _options = options.Value;
-        _logger = logger;
+        _options = options;
+
+        _connectionFactory = new ConnectionFactory
+        {
+            HostName = options.HostName,
+            Port = options.Port,
+            UserName = options.UserName,
+            Password = options.Password,
+        };
+
+        _exchangeName = options.ExchangeName;
+        _routingKey = options.RoutingKey;
     }
 
-    public async Task PublishAsync<TEvent>(TEvent @event) where TEvent : IntegrationEvent
+    public async Task SendAsync(T message, CancellationToken cancellationToken = default)
     {
-        using var channel = (await _connection?.CreateChannelAsync()) ?? throw new InvalidOperationException("RabbitMQ connection is not open");
+        using var connection = await _connectionFactory.CreateConnectionAsync(cancellationToken);
+        using var channel = await connection.CreateChannelAsync(cancellationToken: cancellationToken);
 
-        await channel.ExchangeDeclareAsync(
-            exchange: _options.ExchangeName,
-            type: ExchangeType.Direct,
-            durable: true,
-            autoDelete: false);
+        await channel.ExchangeDeclareAsync(_options.ExchangeName, _options.ExchangeType, durable: true, autoDelete: false, cancellationToken: cancellationToken);
 
-        var eventName = @event.GetType().FullName!;
-        var json = JsonSerializer.Serialize(@event, @event.GetType());
-        var body = Encoding.UTF8.GetBytes(json);
+        var dataJson = JsonSerializer.Serialize(message, message.GetType());
+        var body = Encoding.UTF8.GetBytes(dataJson);
 
         var properties = new BasicProperties
         {
             Persistent = true,
-            ContentType = "application/json"
         };
 
-        try
-        {
-            await channel.BasicPublishAsync(
-                exchange: _options.ExchangeName,
-                routingKey: eventName,
-                mandatory: true,
-                basicProperties: properties,
-                body: body);
-
-            _logger.LogInformation("Published event {EventName} to RabbitMQ", eventName);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, "Error publishing event {EventName}", eventName);
-            throw;
-        }
+        await channel.BasicPublishAsync(_exchangeName, _routingKey, true, properties, body, cancellationToken);
     }
 }
 

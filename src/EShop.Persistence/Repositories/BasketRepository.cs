@@ -6,9 +6,9 @@ namespace EShop.Persistence.Repositories;
 
 public class BasketRepository : Repository<Basket, Guid>, IBasketRepository
 {
-    private readonly ApplicationDbContext _dbContext;
+    private readonly EShopDbContext _dbContext;
 
-    public BasketRepository(ApplicationDbContext dbContext) : base(dbContext)
+    public BasketRepository(EShopDbContext dbContext) : base(dbContext)
     {
         _dbContext = dbContext;
     }

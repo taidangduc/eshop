@@ -1,1 +1,1 @@
-﻿dotnet ef migrations add Initial_Identity --project src\IdentityService\IdentityService.csproj
+﻿dotnet ef migrations add Initial_Identity --project EShop.IdentityService --output-dir Persistence/Migrations

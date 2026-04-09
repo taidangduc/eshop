@@ -1,3 +1,0 @@
-﻿dotnet ef migrations add Initial_Outbox --context OutboxDbContext --project Outbox.EF --startup-project Api --output-dir Infrastructure/Migrations
-
-dotnet ef database update --context OutboxDbContext

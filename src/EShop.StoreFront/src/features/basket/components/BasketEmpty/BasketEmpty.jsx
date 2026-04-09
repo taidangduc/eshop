@@ -1,7 +1,6 @@
-import React from 'react';
 import styles from './BasketEmpty.module.css';
 
-export default function BasketEmpty() {
+export function BasketEmpty() {
   return (
     <div className={styles['basket-empty']}>
       <div className={styles['basket-empty__inner']}>

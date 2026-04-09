@@ -2,7 +2,7 @@ using EShop.Domain.SeedWork;
 
 namespace EShop.Domain.Repositories;
 
-public interface IRepository<TEntity, TKey> where TEntity : Entity<TKey>
+public interface IRepository<TEntity, TKey> where TEntity : Entity<TKey>, IAggregateRoot
 {
     IUnitOfWork UnitOfWork { get; }
     IQueryable<TEntity> GetQueryableSet();

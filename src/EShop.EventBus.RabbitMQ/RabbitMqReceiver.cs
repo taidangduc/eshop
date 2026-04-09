@@ -1,9 +1,3 @@
-using EShop.EventBus.Abstractions;
-using EShop.EventBus.Events;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
@@ -11,124 +5,85 @@ using System.Text.Json;
 
 namespace EShop.EventBus.RabbitMQ;
 
-public class RabbitMqReceiver : BackgroundService, IDisposable
+public class RabbitMQReceiver<T> : IEventBusConsumer<T>, IDisposable
 {
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IConnection _connection;
-    private readonly RabbitMqOptions _options;
-    private readonly EventBusSubscriptionManager _subscriptions;
-    private readonly ILogger<RabbitMqReceiver> _logger;
-    private IChannel? _channel;
+    private readonly RabbitMQReceiverOptions _options;
+    private readonly IEventDispatcher _dispatcher;
+    private IConnection _connection;
+    private IChannel _channel;
 
-    public RabbitMqReceiver(
-        IServiceProvider serviceProvider,
-        IConnection connection,
-        IOptions<RabbitMqOptions> options,
-        IOptions<EventBusSubscriptionManager> subscriptionManager,
-        ILogger<RabbitMqReceiver> logger)
+    public RabbitMQReceiver(RabbitMQReceiverOptions options, IEventDispatcher dispatcher)
     {
-        _serviceProvider = serviceProvider;
-        _connection = connection;
-        _options = options.Value;
-        _subscriptions = subscriptionManager.Value;
-        _logger = logger;
+        _options = options;
+        _dispatcher = dispatcher;
     }
 
-    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    public async Task ReceiveAsync(CancellationToken cancellationToken)
     {
-        _channel = await _connection.CreateChannelAsync(cancellationToken: stoppingToken);
-
-        await _channel.ExchangeDeclareAsync(
-            exchange: _options.ExchangeName,
-            type: ExchangeType.Direct,
-            durable: true,
-            autoDelete: false,
-            cancellationToken: stoppingToken);
-
-        await _channel.QueueDeclareAsync(
-            queue: _options.QueueName,
-            durable: true,
-            exclusive: false,
-            autoDelete: false,
-            arguments: null,
-            cancellationToken: stoppingToken);
-
-        foreach (var (eventName, _) in _subscriptions.EventTypes)
+        _connection = await new ConnectionFactory
         {
-            await _channel.QueueBindAsync(
-                queue: _options.QueueName,
-                exchange: _options.ExchangeName,
-                routingKey: eventName,
-                cancellationToken: stoppingToken);
+            HostName = _options.HostName,
+            Port = _options.Port,
+            UserName = _options.UserName,
+            Password = _options.Password,
+            AutomaticRecoveryEnabled = true,
+        }.CreateConnectionAsync(cancellationToken);
 
-            _logger.LogInformation("Bound queue {QueueName} to exchange {ExchangeName} with routing key {RoutingKey}",
-                _options.QueueName, _options.ExchangeName, eventName);
+        _channel = await _connection.CreateChannelAsync(cancellationToken: cancellationToken);
+
+        _connection.ConnectionShutdownAsync += (sender, args) =>
+        {
+            // Handle connection shutdown if needed
+            return Task.CompletedTask;
+        };
+
+        if (_options.AutomaticCreateEnabled)
+        {
+            await _channel.ExchangeDeclareAsync(_options.ExchangeName, _options.ExchangeType, true, false, null, cancellationToken: cancellationToken);
+
+            await _channel.QueueDeclareAsync(_options.QueueName, true, false, false, null, cancellationToken: cancellationToken);
+
+            await _channel.QueueBindAsync(_options.QueueName, _options.ExchangeName, _options.RoutingKey, null, cancellationToken: cancellationToken);
         }
+
+        await _channel.BasicQosAsync(prefetchSize: 0, prefetchCount: 1, global: false, cancellationToken: cancellationToken);
 
         var consumer = new AsyncEventingBasicConsumer(_channel);
         consumer.ReceivedAsync += async (model, ea) =>
         {
-            var eventName = ea.RoutingKey;
-            var body = ea.Body.ToArray();
-            var message = Encoding.UTF8.GetString(body);
+            if (cancellationToken.IsCancellationRequested)
+            {
+                return;
+            }
 
             try
             {
-                await ProcessEventAsync(eventName, message);
+                var body = ea.Body.ToArray();
+                var json = Encoding.UTF8.GetString(body);
+                var message = JsonSerializer.Deserialize<T>(json);
+
+                if (message is null)
+                {
+                    await _channel.BasicRejectAsync(ea.DeliveryTag, false);
+                    return;
+                }
+
+                await _dispatcher.DispatchAsync(message, cancellationToken: cancellationToken);
                 await _channel.BasicAckAsync(ea.DeliveryTag, false);
             }
-            catch (Exception ex)
+            catch
             {
-                _logger.LogError(ex, "Error processing event {EventName}", eventName);
-                await _channel.BasicNackAsync(ea.DeliveryTag, false, true);
+                await _channel.BasicRejectAsync(ea.DeliveryTag, false);
             }
         };
 
-        await _channel.BasicConsumeAsync(
-            queue: _options.QueueName,
-            autoAck: false,
-            consumer: consumer,
-            cancellationToken: stoppingToken);
-
-        _logger.LogInformation("RabbitMQ receiver started listening on queue {QueueName}", _options.QueueName);
-
-        await Task.Delay(Timeout.Infinite, stoppingToken);
+        await _channel.BasicConsumeAsync(_options.QueueName, false, consumer, cancellationToken: cancellationToken);
     }
 
-    private async Task ProcessEventAsync(string eventName, string message)
-    {
-        await using var scope = _serviceProvider.CreateAsyncScope();
-
-        if (!_subscriptions.EventTypes.TryGetValue(eventName, out var eventType))
-        {
-            _logger.LogWarning("No subscription for event: {EventName}", eventName);
-            return;
-        }
-
-        var integrationEvent = JsonSerializer.Deserialize(message, eventType, _subscriptions.JsonOptions) as IntegrationEvent;
-
-        if (integrationEvent is null)
-        {
-            _logger.LogError("Failed to deserialize event: {EventName}", eventName);
-            return;
-        }
-
-        foreach (var handler in scope.ServiceProvider.GetKeyedServices<IIntegrationEventHandler>(eventType))
-        {
-            try
-            {
-                await handler.Handle(integrationEvent);             
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error handling event: {EventName}", eventName);
-            }
-        }
-    }
-
-    public override void Dispose()
+    public void Dispose()
     {
         _channel?.Dispose();
+        _connection?.Dispose();
     }
 }
 

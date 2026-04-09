@@ -1,26 +1,43 @@
-using EShop.EventBus.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 
 namespace EShop.EventBus.RabbitMQ;
 
+
 public static class Extensions
 {
-    public static IEventBusBuilder AddRabbitMqEventBus(this IHostApplicationBuilder builder, string connectionName = "rabbitmq")
+    public static IServiceCollection AddRabbitMQSender<T>(this IServiceCollection services, RabbitMQOptions options)
     {
-        ArgumentNullException.ThrowIfNull(builder);
+        services.AddSingleton<IEventBusProducer<T>>(new RabbitMQSender<T>(new RabbitMQSenderOptions
+        {
+            HostName = options.HostName,
+            Port = options.Port,
+            UserName = options.UserName,
+            Password = options.Password,
+            ExchangeName = options.ExchangeName,
+            ExchangeType = options.ExchangeType,
+            RoutingKey = options.RoutingKeys[typeof(T).Name]
+        }));
 
-        builder.AddRabbitMQClient(connectionName);
-
-        builder.Services.AddSingleton<IEventPublisher, RabbitMqSender>();
-        builder.Services.AddHostedService<RabbitMqReceiver>();
-
-        return new RabbitMqEventBusBuilder(builder.Services);
+        return services;
     }
 
-    private class RabbitMqEventBusBuilder(IServiceCollection services) : IEventBusBuilder
+    public static IServiceCollection AddRabbitMQReceiver<TConsumer, T>(this IServiceCollection services, RabbitMQOptions options)
     {
-        public IServiceCollection Services => services;
+        var receiverOptions = new RabbitMQReceiverOptions
+        {
+            HostName = options.HostName,
+            Port = options.Port,
+            UserName = options.UserName,
+            Password = options.Password,
+            ExchangeName = options.ExchangeName,
+            ExchangeType = options.ExchangeType,
+            RoutingKey = options.RoutingKeys[typeof(T).Name],
+            QueueName = options.Consumers[typeof(TConsumer).Name][typeof(T).Name],
+            AutomaticCreateEnabled = true,
+        };
+
+        services.AddSingleton<IEventBusConsumer<T>>(sp => new RabbitMQReceiver<T>(receiverOptions, sp.GetRequiredService<IEventDispatcher>()));
+
+        return services;
     }
 }
-

@@ -1,12 +1,16 @@
+using EShop.IdentityService.ConfigurationOptions;
 using EShop.IdentityService.Extensions;
-using EShop.IdentityService.Infrastructure.Data;
+using EShop.IdentityService.Persistence;
 using EShop.Migrator;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddServiceDefaults();
 
-builder.AddApplicationServices();
+var appSettings = new AppSettings();
+builder.Configuration.Bind(appSettings);
+
+builder.AddApplicationServices(appSettings);
 
 builder.Services.AddControllersWithViews();
 
@@ -36,6 +40,6 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
-await app.MigrationDbContextAsync<IdentityContext>();
+await app.MigrationDbContextAsync<IdentityDbContext>();
 
 app.Run();

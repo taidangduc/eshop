@@ -5,8 +5,7 @@ namespace EShop.Persistence.Repositories;
 
 public class ProductRepository : Repository<Product, Guid>, IProductRepository
 {
-    public ProductRepository(ApplicationDbContext dbContext) : base(dbContext)
+    public ProductRepository(EShopDbContext dbContext) : base(dbContext)
     {
-
     }
 }

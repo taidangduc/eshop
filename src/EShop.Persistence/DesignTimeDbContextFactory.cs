@@ -3,13 +3,13 @@ using Microsoft.EntityFrameworkCore.Design;
 
 namespace EShop.Persistence;
 
-public class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<ApplicationDbContext>
+public class EShopDesignTimeDbContextFactory : IDesignTimeDbContextFactory<EShopDbContext>
 {
-    public ApplicationDbContext CreateDbContext(string[] args)
+    public EShopDbContext CreateDbContext(string[] args)
     {
-        var optionsBuilder = new DbContextOptionsBuilder<ApplicationDbContext>();
-        optionsBuilder.UseNpgsql("Host=localhost;Database=EShopDb;Username=postgres;Password=postgres;");
+        var optionsBuilder = new DbContextOptionsBuilder<EShopDbContext>();
+        optionsBuilder.UseNpgsql("Host=localhost;Database=EShopDb;Username=postgres;Password=postgres");
 
-        return new ApplicationDbContext(optionsBuilder.Options);
+        return new EShopDbContext(optionsBuilder.Options);
     }
 }
