@@ -2,7 +2,6 @@ import {
   useState,
   useContext,
   createContext,
-  useEffect,
   useMemo,
   useCallback,
 } from "react";
@@ -10,12 +9,12 @@ import {
 const Context = createContext(null);
 
 export const Provider = ({ children, images }) => {
-  // const [index, setIndex] = useState(0);
-  // const [hovered, setHovered] = useState(null);
-
   const [preview, setPreview] = useState(images[0]);
-  const [index, setIndex] = useState(0);
   const [sourceImage, setSourceImage] = useState(images[0]);
+
+  // in this project have 2 source of image
+  // 1. image from product image
+  // 2. image from prouct option value
 
   const setTemporary = useCallback((img) => {
     setPreview(img);
@@ -36,10 +35,8 @@ export const Provider = ({ children, images }) => {
       setTemporary,
       apply,
       reset,
-      index,
-      setIndex,
     }),
-    [preview, setTemporary, apply, reset, index, setIndex],
+    [preview, setTemporary, apply, reset],
   );
 
   return <Context.Provider value={ctx}>{children}</Context.Provider>;

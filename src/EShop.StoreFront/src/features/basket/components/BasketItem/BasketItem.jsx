@@ -10,16 +10,10 @@ import {
 import { Image } from "@/components/ui";
 import { Link } from "react-router-dom";
 
-export function BasketItem({
-  item,
-  onUpdate,
-  isUpdating,
-  error,
-  errorMessage,
-}) {
+export function BasketItem({ item, onUpdate, isLoading, error, errorMessage }) {
   const totalPrice = (price, quantity) => price * quantity;
 
-  if (isUpdating) {
+  if (isLoading) {
     return (
       <div className={s["basket-item"]} role="listitem">
         <TableRow>

@@ -117,7 +117,7 @@ export function ProductDetailPage() {
           />
         </div>
       )}
-      {/* Modal */}
+      {/* Internal Modal */}
       {cart_modal && (
         <div className={s["add-to-cart__modal"]}>
           <div

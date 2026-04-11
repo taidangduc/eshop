@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { updateBasket, getBasket } from "./api";
 import { useMemo, useState } from "react";
+import { useDebouncedValue } from "../../hooks/useDebouncedValue";
 
 export function useBasket() {
   const [confirmedDelete, setConfirmedDelete] = useState(false);
@@ -11,7 +12,8 @@ export function useBasket() {
   const query = useBasketQuery();
   const mutation = useUpdateBasket();
 
-  const basket = query.data;
+  const { data: basket } = query;
+
   const totalPrice = useMemo(() => {
     if (!basket) return 0;
     return basket.items.reduce(
@@ -78,7 +80,7 @@ export function useBasket() {
         onError: (err) => {
           setError({
             id: variantId,
-            message: "Failed to update the basket. Please try again.",
+            message: "Failed to update the basket.",
           });
         },
       },
@@ -96,7 +98,7 @@ export function useBasket() {
         onError: (err) => {
           setError({
             id: pendingDelete.id,
-            message: "Failed to delete the item. Please try again.",
+            message: "Failed to delete the item.",
           });
         },
       },
@@ -116,9 +118,10 @@ export function useBasket() {
     query,
     mutation,
     isFetching: query.isFetching,
-    isUpdateing: mutation.isLoading,
+    isFirstLoad: query.isFetching && !query.isFetched,
+    isUpdating: mutation.isLoading,
     open,
-    error,
+    error: useDebouncedValue(error, 300),
     confirmedDelete,
     pendingDelete,
     addToCart,
@@ -132,12 +135,12 @@ export function useBasketQuery() {
   return useQuery({
     queryKey: ["basket"],
     queryFn: () => getBasket().then((res) => res.data),
-    initialData: {
+    placeholderData: {
       id: "",
       customerId: "",
-      items: [],
       createdAt: new Date().toISOString(),
       updatedAt: null,
+      items: [],
     },
   });
 }

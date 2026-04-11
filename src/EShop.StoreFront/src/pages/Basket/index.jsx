@@ -1,6 +1,5 @@
 import s from "./index.module.css";
 import clsx from "clsx";
-
 import {
   Modal,
   Table,
@@ -10,139 +9,40 @@ import {
   PageLoading,
 } from "@/components/ui";
 import { useNavigate } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { getBasket, updateBasket } from "@features/basket/api";
 import { useEffect, useState } from "react";
 import { formatCurrency } from "@/lib/format";
-
 import {
   BasketItem,
   BasketEmpty,
   BasketHeader,
 } from "@features/basket/components/index";
 import { NavbarLayout } from "../../components/layouts/Navbar";
+import { useBasket } from "../../features/basket/hook";
 
 export function BasketPage() {
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
 
-  //re-load page after isFetching
-  const [showLoading, setShowLoading] = useState(false);
-  const [showItemLoading, setShowItemLoading] = useState(false);
-  const [hasError, setHasError] = useState({
-    isError: false,
-    id: null,
-    message: "",
-  });
-
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [pendingDelete, setPendingDelete] = useState({
-    variantId: null,
-    title: "",
-    name: "",
-  });
+  const [componentLoading, setComponentLoading] = useState(false);
+  const [pageLoading, setPageLoading] = useState(false);
 
   const {
-    data: basket,
-    isFetching,
-    isFetched,
-  } = useQuery({
-    queryKey: ["basket"],
-    queryFn: () => getBasket().then((res) => res.data),
-    retry: false,
-    refetchOnWindowFocus: false,
-    initialData: {
-      id: "",
-      customerId: "",
-      items: [],
-      createdAt: new Date().toDateString(),
-      lastModified: null,
-    },
-  }); 
-  // mutation basket state
-  const updateMutation = useMutation({
-    mutationFn: ({ variantId, quantity }) => updateBasket(variantId, quantity),
+    basket,
+    totalPrice,
+    query,
+    mutation,
+    error,
+    confirmedDelete,
+    pendingDelete,
+    updateCartItem,
+    confirmDelete,
+    cancelDelete,
+  } = useBasket();
 
-    onMutate: async ({ variantId, quantity }) => {
-      await queryClient.cancelQueries({ queryKey: ["basket"] });
+  const is_first_load = query.isFetching && !query.isFetched;
+  const item_in_cart = basket?.items?.length;
 
-      const previousBasket = queryClient.getQueryData(["basket"]);
-
-      // optimistic update
-      queryClient.setQueryData(["basket"], (old) => {
-        if (!old) return old;
-
-        return {
-          ...old,
-          items: old.items
-            .map((item) =>
-              item.variantId === variantId ? { ...item, quantity } : item,
-            )
-            .filter((item) => item.quantity > 0),
-        };
-      });
-
-      return { previousBasket, variantId };
-    },
-    onSuccess: () => {
-      setHasError({
-        isError: false,
-        id: null,
-        message: "",
-      });
-    },
-    onError: (err, variables, context) => {
-      if (context?.previousBasket) {
-        queryClient.setQueryData(["basket"], context.previousBasket);
-      }
-      setHasError({
-        isError: true,
-        id: variables.variantId,
-        message: "Invalid input",
-      });
-    },
-
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["basket"] });
-    },
-  });
-
-  // mutation price: reduce(func, initValue)
-  const totalPrice = basket.items?.reduce(
-    (sum, item) => (sum = sum + item.price * item.quantity),
-    0,
-  );
-
-  const handleUpdateBasket = (variantId, quantity) => {
-    if (quantity === 0) {
-      setConfirmDelete(true);
-
-      const variant = basket.items.find((item) => item.variantId === variantId);
-      if (!variant) return;
-
-      setPendingDelete({
-        variantId: variant.variantId,
-        title: variant.title,
-        name: variant.name,
-      });
-
-      return;
-    }
-
-    updateMutation.mutate({ variantId, quantity });
-  };
-
-  const handleConfirmDelete = () => {
-    if (!pendingDelete) return;
-
-    updateMutation.mutate({ variantId: pendingDelete.variantId, quantity: 0 });
-
-    setConfirmDelete(false);
-    setPendingDelete({
-      variantId: null,
-      title: "",
-      name: "",
-    });
+  const redirectToCheckout = () => {
+    navigate("/checkout");
   };
 
   // authentication
@@ -152,34 +52,26 @@ export function BasketPage() {
   //   }
   // }, [basket]);
 
-  // checkout func
-  const handleCheckout = () => {
-    navigate("/checkout");
-  };
-
-  const isFirstLoad = isFetching && !isFetched;
-
-  // item load
+  // wait component loading when update basket item
   useEffect(() => {
-    setShowItemLoading(true);
-    const timer = setTimeout(() => {
-      setShowItemLoading(false);
+    setComponentLoading(true);
+    const timeout = setTimeout(() => {
+      setComponentLoading(false);
     }, 350);
 
-    return () => clearTimeout(timer);
-  }, [isFetching]);
+    return () => clearTimeout(timeout);
+  }, [query.isFetching]);
 
-  // page load
+  // wait page loading when first load or refresh page
   useEffect(() => {
-    setShowLoading(true);
-    const timer = setTimeout(() => {
-      setShowLoading(false);
+    setPageLoading(true);
+    const timeout = setTimeout(() => {
+      setPageLoading(false);
     }, 1000);
+    return () => clearTimeout(timeout);
+  }, [query.isFetched]);
 
-    return () => clearTimeout(timer);
-  }, [isFetched]);
-
-  if (isFirstLoad || showLoading) {
+  if (is_first_load || pageLoading) {
     return <PageLoading />;
   }
 
@@ -189,16 +81,14 @@ export function BasketPage() {
       <BasketHeader />
       <div>
         <div className="mx-auto container-wrapper">
-          {basket && basket.items.length === 0 ? (
+          {basket && item_in_cart === 0 ? (
             <>
               <BasketEmpty />
             </>
           ) : (
             <>
               <div className="flex flex-col pt-[20px]">
-                {/* Table */}
                 <Table>
-                  {/* Table Header */}
                   <TableHeader className={s["basket__table-header"]}>
                     <TableHeaderCell
                       className={s["div-checkbox"]}
@@ -224,58 +114,43 @@ export function BasketPage() {
                       Actions
                     </TableHeaderCell>
                   </TableHeader>
-
-                  {/* Table Body */}
                   <TableBody className={s["basket__table-content"]}>
                     <section className={s["table-content__section"]}>
-                      {/* Title */}
                       <div className={s["table-content__title"]}>
                         <span>
-                          Items: {showItemLoading ? "0" : basket.items.length}
+                          Items: {componentLoading ? "0" : item_in_cart}
                         </span>
                       </div>
-                      {/* CartItem */}
                       <div>
-                        {basket && basket.items.length === 0 ? (
-                          <>
-                            <span></span>
-                          </>
-                        ) : (
-                          <>
-                            {basket.items.map((item, index) => (
-                              <div key={item.variantId}>
-                                <BasketItem
-                                  item={item}
-                                  error={
-                                    hasError.isError &&
-                                    hasError.id === item.variantId
-                                  }
-                                  errorMessage={hasError.message}
-                                  isUpdating={
-                                    showItemLoading &&
-                                    updateMutation.variables?.variantId ===
-                                      item.variantId
-                                  }
-                                  onUpdate={(quantity) => {
-                                    handleUpdateBasket(
-                                      item.variantId,
-                                      quantity,
-                                    );
-                                  }}
-                                />
-                                {index < basket.items.length - 1 && (
-                                  <div className={s["basket__item-divider"]} />
-                                )}
-                              </div>
-                            ))}
-                          </>
-                        )}
+                        {basket.items.map((item, index) => (
+                          <div key={item.variantId}>
+                            <BasketItem
+                              item={item}
+                              error={error && error?.id === item.variantId}
+                              errorMessage={
+                                error?.id === item.variantId
+                                  ? error.message
+                                  : ""
+                              }
+                              isLoading={
+                                componentLoading &&
+                                mutation.variables?.variantId === item.variantId
+                              }
+                              onUpdate={(quantity) => {
+                                updateCartItem(item.variantId, quantity);
+                              }}
+                            />
+                            {index < item_in_cart - 1 && (
+                              <div className={s["basket__item-divider"]} />
+                            )}
+                          </div>
+                        ))}
                       </div>
                     </section>
                   </TableBody>
                 </Table>
               </div>
-              {/* basket footer */}
+              {/* Footer */}
               <section className={s["basket__footer"]}>
                 {/* promotion */}
                 <div className={s["basket__footer-promotion"]}>
@@ -289,7 +164,6 @@ export function BasketPage() {
                     Select or enter code
                   </button>
                 </div>
-                {/*  */}
                 <div className={s["basket__footer-divider"]}></div>
                 {/* total */}
                 <div className={s["basket__footer-total"]}>
@@ -306,9 +180,7 @@ export function BasketPage() {
                   <button className={s["basket__footer--unselected"]}>
                     Delete
                   </button>
-                  {/*  */}
                   <div></div>
-                  {/* text */}
                   <div className="flex-1"></div>
                   <div className="flex flex-col">
                     <div className="flex items-center flex-end">
@@ -318,18 +190,18 @@ export function BasketPage() {
                           s["basket__footer-total-title"],
                         )}
                       >
-                        Total ({showItemLoading ? "0" : basket.items.length}{" "}
+                        Total ({componentLoading ? "0" : basket.items.length}{" "}
                         item):
                       </div>
                       <div className={clsx(s["basket__footer-total-subtitle"])}>
-                        {showItemLoading ? "0₫" : formatCurrency(totalPrice)}
+                        {componentLoading ? "0₫" : formatCurrency(totalPrice)}
                       </div>
                     </div>
                   </div>
                   {/* button */}
                   <div>
                     <button
-                      onClick={() => handleCheckout()}
+                      onClick={() => redirectToCheckout()}
                       className={s["basket__footer-button"]}
                     >
                       <span className={s["basket__footer-button-title"]}>
@@ -343,11 +215,11 @@ export function BasketPage() {
           )}
         </div>
       </div>
-      {/* Modal when remove basket item */}
+      {/* Global modal when remove basket item */}
       <Modal
-        open={confirmDelete}
+        open={confirmedDelete}
         onClose={() => {
-          setConfirmDelete(false);
+          cancelDelete();
         }}
       >
         <div className="bg-white p-6 rounded-[2px] flex flex-col w-[500px]">
@@ -355,8 +227,8 @@ export function BasketPage() {
             Do you want to remove this item?
           </h2>
           <div className="text-[16px]">
-            <span>{pendingDelete.title} </span>
-            {pendingDelete.name && <span>({pendingDelete.name})</span>}
+            <span>{pendingDelete?.title} </span>
+            <span>({pendingDelete?.name})</span>
           </div>
           <div className="flex w-full pt-[60px]">
             <button
@@ -367,7 +239,7 @@ export function BasketPage() {
               }}
               className=" flex-1 m-1 h-[40px]"
               onClick={() => {
-                handleConfirmDelete();
+                confirmDelete();
               }}
             >
               Yes
@@ -380,7 +252,7 @@ export function BasketPage() {
               }}
               className="bg-blue-500 flex-1 m-1 "
               onClick={() => {
-                setConfirmDelete(false);
+                cancelDelete();
               }}
             >
               No

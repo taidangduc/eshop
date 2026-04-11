@@ -1,4 +1,4 @@
-import { authClient } from "@/lib/auth-client";
+import { authClient } from "../../lib/auth-client";
 
 export const getBasket = () => authClient.get(`/api/v1/basket`);
 
