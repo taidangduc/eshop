@@ -1,13 +1,48 @@
-import { useState, useContext, createContext } from "react";
+import {
+  useState,
+  useContext,
+  createContext,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 
 const Context = createContext(null);
 
-export const Provider = ({ children, item }) => {
-  const [image, setImage] = useState(item);
+export const Provider = ({ children, images }) => {
+  // const [index, setIndex] = useState(0);
+  // const [hovered, setHovered] = useState(null);
 
-  return (
-    <Context.Provider value={{ image, setImage }}>{children}</Context.Provider>
+  const [preview, setPreview] = useState(images[0]);
+  const [index, setIndex] = useState(0);
+  const [sourceImage, setSourceImage] = useState(images[0]);
+
+  const setTemporary = useCallback((img) => {
+    setPreview(img);
+  }, []);
+
+  const apply = useCallback((img) => {
+    setSourceImage(img);
+    setPreview(img);
+  }, []);
+
+  const reset = useCallback(() => {
+    setPreview(sourceImage);
+  }, [sourceImage]);
+
+  const ctx = useMemo(
+    () => ({
+      preview,
+      setTemporary,
+      apply,
+      reset,
+      index,
+      setIndex,
+    }),
+    [preview, setTemporary, apply, reset, index, setIndex],
   );
+
+  return <Context.Provider value={ctx}>{children}</Context.Provider>;
 };
 
 export const useProductImage = () => {

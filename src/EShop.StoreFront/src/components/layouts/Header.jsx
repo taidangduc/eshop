@@ -1,6 +1,6 @@
 import logo from "@/public/logo-brand-no-bg.png";
 
-export default function Header() {
+export function HeaderLayout() {
   return (
     <div
       className="container-wrapper mx-auto"

@@ -1,6 +1,6 @@
 import axios, { AxiosError } from "axios";
 
-export const apiAuth = axios.create({
+export const authClient = axios.create({
   baseURL: "/bff",
   withCredentials: true,
   headers: {
@@ -9,7 +9,7 @@ export const apiAuth = axios.create({
   },
 });
 
-apiAuth.interceptors.response.use(
+authClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (!error.response) {

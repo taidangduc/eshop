@@ -3,8 +3,7 @@ import s from "./index.module.css";
 
 export function QuantitySelector({
   stock,
-  quantity,
-  onChange,
+  count,
   onShow,
   onIncrease,
   onDecrease,
@@ -24,11 +23,11 @@ export function QuantitySelector({
             <button
               type="button"
               onClick={() => onDecrease()}
-              disabled={quantity <= 1}
+              disabled={count <= 1}
               aria-label="Decrease"
               className={clsx(
                 s["quantity-selector__button"],
-                onShow && quantity > 1 && s["active"],
+                onShow && count > 1 && s["active"],
               )}
             >
               <svg
@@ -46,14 +45,14 @@ export function QuantitySelector({
             <input
               aria-label="search-input"
               type="text"
-              value={quantity}
+              value={count}
               readOnly
               className={s["quantity-selector__input"]}
             />
             <button
               type="button"
               onClick={() => onIncrease()}
-              disabled={!onShow || quantity + 1 > stock}
+              disabled={!onShow || count + 1 > stock}
               aria-label="Increase"
               className={clsx(
                 s["quantity-selector__button"],

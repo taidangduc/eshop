@@ -1,10 +1,10 @@
-import { apiAuth } from "@/lib/api-auth";
+import { authClient } from "@/lib/auth-client";
 import { apiClient } from "@/lib/api-client";
 
-export const getOrder = () => apiAuth.get(`/api/v1/orders`);
+export const getOrder = () => authClient.get(`/api/v1/orders`);
 
 export const getCheckoutOrder = (orderNumber) =>
-  apiAuth.get(`/api/v1/orders/checkout/${orderNumber}`);
+  authClient.get(`/api/v1/orders/checkout/${orderNumber}`);
 
 export const createOrder = (
   _customerId,
@@ -14,7 +14,7 @@ export const createOrder = (
   _city,
   _zipCode,
 ) =>
-  apiAuth.post(`/api/v1/orders`, {
+  authClient.post(`/api/v1/orders`, {
     customerId: _customerId,
     method: _method,
     provider: _provider,

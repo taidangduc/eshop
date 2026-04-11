@@ -60,7 +60,7 @@ export const AuthProvider = ({ children }) => {
     return { success: true };
   };
 
-  const value = useMemo(
+  const ctx = useMemo(
     () => ({
       user,
       isAuthenticated: Boolean(user),
@@ -75,6 +75,7 @@ export const AuthProvider = ({ children }) => {
     [user, isLoading, isFetching, error, refetch],
   );
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={ctx}>{children}</AuthContext.Provider>;
 };
+
 export { AuthContext };

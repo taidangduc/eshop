@@ -370,7 +370,7 @@
   margin-right: 15px;
   background: rgba(0, 0, 0, 0.09);
   color: black;
-  border: 1px solid;
+  border: .5px solid;
 }
 
 .card-text {

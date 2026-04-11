@@ -14,7 +14,7 @@ import {
   PaymentMethod,
 } from "@features/checkout/components";
 
-import NavBar from "@/components/layouts/storefront/components/Navbar/Navbar";
+import { NavbarLayout } from "../../components/layouts/Navbar";
 
 export function CheckoutPage() {
   const navigate = useNavigate();
@@ -149,9 +149,10 @@ export function CheckoutPage() {
     <div>
       {/* HEADER */}
       <div className="bg-white" style={{ marginBottom: "12px" }}>
-        <NavBar />
+        <NavbarLayout />
         <CheckoutHeader />
       </div>
+      {/* CONTENT */}
       <div>
         <div
           role="main"
@@ -217,6 +218,7 @@ export function CheckoutPage() {
           </div>
         </div>
       </div>
+      {/* MODAL */}
       {isValid && (
         <Modal open={isValid} onClose={() => setIsValid(false)}>
           <div className={s["w4p-container"]}>

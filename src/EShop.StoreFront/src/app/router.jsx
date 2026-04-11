@@ -4,9 +4,10 @@ import { CheckoutPage } from "@pages/checkout/index";
 import { CheckoutStatusPage } from "@pages/checkout/[status]/index";
 import { NotFoundPage } from "@pages/NotFound";
 import { HomePage } from "@pages/home/index";
-import RootLayout from "../components/layouts/storefront/layout";
+import { RootLayout } from "@components/layouts/Root";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
-export const routes = [
+const routes = [
   {
     element: <RootLayout />,
     children: [
@@ -18,4 +19,11 @@ export const routes = [
   { path: "/cart", element: <BasketPage /> },
   { path: "/checkout", element: <CheckoutPage /> },
   { path: "/checkout/:status", element: <CheckoutStatusPage /> },
+  { path: "*", element: <NotFoundPage /> },
 ];
+
+const router = createBrowserRouter(routes);
+
+export function AppRouter() {
+  return <RouterProvider router={router} />;
+}

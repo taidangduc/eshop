@@ -43,7 +43,7 @@ export default defineConfig(({ mode }) => {
         "@pages": p.resolve(__dirname, "src/pages"),
         "@app": p.resolve(__dirname, "src/app"),
         "@features": p.resolve(__dirname, "src/features"),
-        "@shared": p.resolve(__dirname, "src/shared"),
+        "@components": p.resolve(__dirname, "src/components"),
         "@assets": p.resolve(__dirname, "src/assets"),
       },
     },

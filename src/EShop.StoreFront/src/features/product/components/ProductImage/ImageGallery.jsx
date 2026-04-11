@@ -1,78 +1,73 @@
 import { useProductImage } from "../../context";
 import s from "./index.module.css";
 import clsx from "clsx";
-
 import arrowLeft from "@/public/arrow_left.svg";
 import arrowRight from "@/public/arrow_right.svg";
-
 import { Image } from "@/components/ui";
+import { useState } from "react";
 
-export const ImageGallery = ({
-  images = [],
-  limit,
-  galleryIndex,
-  onSetGalleryIndex,
-  onSelectImage,
-  selectedImage,
-}) => {
+export const ImageGallery = ({ images = [], limit }) => {
   //context
-  const { setImage } = useProductImage();
+  const { apply } = useProductImage();
 
-  const visibleImages = images.slice(galleryIndex, galleryIndex + limit);
-  const shouldShowButton = images && images.length > limit;
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(0);
 
-  const nextItem = () => {
+  const imageList = images.slice(galleryIndex, galleryIndex + limit);
+  const canShowButton = images && images.length > limit;
+
+  const nextIndexInGallery = () => {
     if (galleryIndex + limit < images.length) {
-      onSetGalleryIndex(galleryIndex + 1);
+      setGalleryIndex(galleryIndex + 1);
     }
   };
 
-  const prevItem = () => {
+  const prevIndexInGallery = () => {
     if (galleryIndex > 0) {
-      onSetGalleryIndex(galleryIndex - 1);
+      setGalleryIndex(galleryIndex - 1);
     }
   };
 
-  const handleImage = (index, image) => {
-    onSelectImage(index);
-    setImage(image);
+  const selectImageByIndex = (index, image) => {
+    setCurrentIndex(index);
+    apply(image);
   };
 
   return (
     <div className={s["gallery-section"]}>
-      {visibleImages.map((img, index) => {
-        const __index = galleryIndex + index;
-        const __active = __index === selectedImage;
+      {imageList.map((img, i) => {
+        const __index = galleryIndex + i;
+        const __active = __index === currentIndex;
 
         return (
           <div
-            key={index}
+            key={i}
             className={s["image-wrapper"]}
-            onMouseEnter={() => handleImage(__index, img.imageUrl)}
+            onMouseEnter={() => selectImageByIndex(__index, img)}
             onMouseLeave={() => {}}
-            onClick={() => handleImage(__index, img.imageUrl)}
+            onClick={() => selectImageByIndex(__index, img)}
           >
             <Image
               src={img.imageUrl}
-              alt={`Thumbnail ${index}`}
+              alt={`Thumbnail ${i}`}
               className={`${s["image-box"]} ${__active ? s["active"] : ""}`}
             />
           </div>
         );
       })}
-      {shouldShowButton && (
+      {canShowButton && (
         <>
           <button
             className={clsx(s["gallery__button"], s["gallery__button--left"])}
             disabled={galleryIndex === 0}
-            onClick={prevItem}
+            onClick={prevIndexInGallery}
           >
             <img src={arrowLeft} />
           </button>
           <button
             className={clsx(s["gallery__button"], s["gallery__button--right"])}
             disabled={galleryIndex + limit >= images.length}
-            onClick={nextItem}
+            onClick={nextIndexInGallery}
           >
             <img src={arrowRight} />
           </button>

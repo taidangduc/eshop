@@ -38,16 +38,22 @@ export function TableRow({ children, className, ...props }) {
   );
 }
 
-export function TableCell({ children, className, flex, align = "left", ...props }) {
+export function TableCell({
+  children,
+  className,
+  flex,
+  align = "left",
+  ...props
+}) {
   const style = flex ? { flex } : undefined;
-  
+
   return (
     <div
       className={clsx(
         s["table-cell"],
         align === "center" && s["table-cell--center"],
         align === "right" && s["table-cell--right"],
-        className
+        className,
       )}
       role="cell"
       style={style}
@@ -58,9 +64,15 @@ export function TableCell({ children, className, flex, align = "left", ...props 
   );
 }
 
-export function TableHeaderCell({ children, className, flex, align = "left", ...props }) {
+export function TableHeaderCell({
+  children,
+  className,
+  flex,
+  align = "left",
+  ...props
+}) {
   const style = flex ? { flex } : undefined;
-  
+
   return (
     <div
       className={clsx(
@@ -68,7 +80,7 @@ export function TableHeaderCell({ children, className, flex, align = "left", ...
         s["table-header-cell"],
         align === "center" && s["table-cell--center"],
         align === "right" && s["table-cell--right"],
-        className
+        className,
       )}
       role="columnheader"
       style={style}

@@ -1,6 +1,5 @@
 export { ProductCard } from "./ProductCard";
 export { ProductList } from "./ProductList";
-export { ProductImage } from "./ProductImage";
 export { ImagePreview } from "./ProductImage/ImagePreview";
 export { ImageGallery } from "./ProductImage/ImageGallery";
 export { ProductInfo } from "./ProductInfo";

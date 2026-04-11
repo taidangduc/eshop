@@ -1,7 +1,6 @@
 import s from "./index.module.css";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   ImagePreview,
   ImageGallery,
@@ -10,268 +9,70 @@ import {
   QuantitySelector,
   ProductOverview,
 } from "@features/product/components/index";
-import { getProduct, getVariantByOptions } from "@features/product/api";
-import { Provider } from "@features/product/context";
-import { formatCurrency } from "@/lib/format";
-import { getBasket, updateBasket } from "@features/basket/api";
 import clsx from "clsx";
+import { Provider } from "../../../features/product/context";
+import { useProduct } from "../../../features/product/hook";
+import { useBasket } from "../../../features/basket/hook";
+import { useCounter } from "../../../hooks/useCounter";
 
 export function ProductDetailPage() {
   const { id } = useParams();
-  const queryClient = useQueryClient();
   const hasTrackedRef = useRef(false);
-
-  const [selectedOptions, setSelectedOptions] = useState({});
-  const [selectedImage, setSelectedImage] = useState(0);
-  const [galleryIndex, setGalleryIndex] = useState(0);
-  const [quantity, setQuantity] = useState(0); // current quantity in basket
-  const [inputValue, setInputValue] = useState(1); // default value
-  const [displayPrice, setDisplayPrice] = useState("");
-  const [displayStock, setDisplayStock] = useState(0);
-  const [hasError, setHasError] = useState({ isError: false, message: "" });
-  const [isSuccess, setIsSuccess] = useState(false);
-
-  // filter available quantity and options ???
-  const [variantId, setVariantId] = useState(null);
-
-  const canSetQuantity = variantId !== null;
-
-  // useQuery[basket]
-  const { data: basket } = useQuery({
-    queryKey: ["basket"],
-    queryFn: () => getBasket().then((res) => res.data),
-    refetchOnWindowFocus: false,
-    initialData: {
-      id: "",
-      customerId: "",
-      items: [],
-      createdAt: new Date().toDateString(),
-      lastModified: null,
-    },
-  });
-
-  const updateBasketItem = useMutation({
-    mutationFn: (qty) => updateBasket(variantId, qty),
-    onSuccess: () => {
-      queryClient.refetchQueries({ queryKey: ["basket"] });
-      setHasError({ isError: false, message: "" });
-      setIsSuccess(true);
-    },
-    onError: (err) => {
-      setHasError({ isError: true, message: "Invalid Input" });
-      console.log(err);
-    },
-  });
-
-  const handleAddToCart = () => {
-    if (!variantId) {
-      setHasError({
-        isError: true,
-        message: "Please select product variation first",
-      });
-      return;
-    }
-
-    const newQuantity = quantity > 0 ? quantity + inputValue : inputValue;
-    updateBasketItem.mutate(newQuantity);
-  };
-
-  const handleIncrease = () => {
-    setInputValue((prev) => prev + 1);
-  };
-
-  const handleDecrease = () => {
-    setInputValue((prev) => Math.max(1, prev - 1));
-  };
-
-  // sync quantity from basket
-  useEffect(() => {
-    if (!variantId) return;
-    const existingItem = basket?.items.find(
-      (item) => item.productVariantId === variantId,
-    );
-    if (existingItem) {
-      setQuantity(existingItem.quantity);
-    } else {
-      setQuantity(0);
-    }
-  }, [basket, variantId]);
 
   useEffect(() => {
     if (id && !hasTrackedRef.current) {
       hasTrackedRef.current = true;
-      //
     }
   }, [id]);
 
-  const optionValueIds = useMemo(
-    () => Object.values(selectedOptions || {}),
-    [selectedOptions],
-  );
+  const { products, selectedOption, selectOption, variantId, stock, price } = useProduct(id);
+  const { error: cart_error, open: cart_modal, addToCart } = useBasket();
+  const { count, increase, decrease } = useCounter();
 
-  // useQuery[variant]
-  const {
-    data: variant,
-    isLoading: vLoading,
-    isFetching,
-  } = useQuery({
-    queryKey: ["variant", id, optionValueIds],
-    queryFn: () =>
-      getVariantByOptions(id, optionValueIds).then((res) => res.data),
-    enabled: optionValueIds.length > 0,
-  });
-
-  // useQuery[product]
-  const {
-    data: product,
-    isLoading,
-    error,
-  } = useQuery({
-    queryKey: ["product", id],
-    queryFn: () => getProduct(id).then((res) => res.data),
-    enabled: !!id,
-  });
-
-  const gallery__limit = 5;
-  const current__image = product?.gallery?.[0]?.imageUrl;
-  // set display price text
-  const handleSetPriceText = (minPrice, maxPrice) => {
-    if (minPrice == null || maxPrice == null) return "";
-
-    if (minPrice === maxPrice) return formatCurrency(maxPrice);
-
-    return `${formatCurrency(minPrice)} - ${formatCurrency(maxPrice)}`;
-  };
-
-  // display option selected (clone + delete object)
-  const handleSelectOption = (optionId, optionValueId) => {
-    setSelectedOptions((prev) => {
-      const next = { ...prev };
-      if (next[optionId] === optionValueId) {
-        delete next[optionId];
-      } else {
-        next[optionId] = optionValueId;
-      }
-      return next;
-    });
-  };
-
-  const resolveStock = () => {
-    if (variant) return variant.totalStock ?? 0;
-    if (product?.variantSummary) return product.variantSummary.quantity ?? 0;
-    return 0;
-  };
-
-  // get price source (variant/product)
-  const priceSource = useMemo(() => {
-    if (variant) {
-      return {
-        minPrice: variant.minPrice,
-        maxPrice: variant.maxPrice,
-      };
-    }
-
-    if (product?.variantSummary) {
-      return {
-        minPrice: product.variantSummary.minPrice,
-        maxPrice: product.variantSummary.maxPrice,
-      };
-    }
-    return null;
-  }, [variant, product]);
-
-  // update display price text when product/variant change state
-  useEffect(() => {
-    if (!priceSource) return;
-
-    const newPrice = handleSetPriceText(
-      priceSource.minPrice,
-      priceSource.maxPrice,
-    );
-
-    const timer = setTimeout(() => {
-      setDisplayPrice(newPrice);
-    }, 800);
-
-    return () => clearTimeout(timer);
-  }, [priceSource]);
-
-  // update display stock when product/variant change state
-  useEffect(() => {
-    const stock = resolveStock();
-    const timer = setTimeout(() => {
-      setDisplayStock(stock);
-    }, 800);
-
-    return () => clearTimeout(timer);
-  }, [product, variant]);
-
-  // get variant id
-  useEffect(() => {
-    if (variant?.variants.length === 1) {
-      setVariantId(variant.variants[0].id);
-    } else if (product?.variantSummary?.id) {
-      setVariantId(product.variantSummary.id);
-    } else {
-      setVariantId(null);
-    }
-  }, [product, variant]);
-
-  // add to cart success
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setIsSuccess(false);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [isSuccess]);
+  const hasOneVariant = variantId !== null;
+  const limitPhoto = 5;
 
   return (
     <>
-      {product && (
+      {products && (
         <div className={s["container"]}>
           <div className="flex mt-3 bg-white">
-            <Provider item={current__image}>
+            <Provider images={products?.data?.gallery}>
               {/* Left Section*/}
               <div className={s["detail__section--left"]}>
                 <div className="flex flex-col">
                   <ImagePreview />
                   <ImageGallery
-                    images={product.gallery}
-                    limit={gallery__limit}
-                    galleryIndex={galleryIndex}
-                    onSetGalleryIndex={setGalleryIndex}
-                    selectedImage={selectedImage}
-                    onSelectImage={setSelectedImage}
+                    images={products?.data?.gallery}
+                    limit={limitPhoto}
                   />
                 </div>
               </div>
               {/* Right Section */}
               <div className={s["detail__section--right"]}>
-                <ProductInfo price={displayPrice} name={product.title} />
+                <ProductInfo price={price} name={products?.data?.title} />
                 <div
                   className={clsx(
                     s["selector__section"],
-                    hasError.isError && s["error"],
+                    cart_error && s["error"],
                   )}
                 >
                   <div className="flex flex-col">
                     <VariantSelector
-                      options={product.options}
-                      selectedOption={selectedOptions}
-                      onChange={handleSelectOption}
+                      options={products?.data?.options}
+                      selectedOption={selectedOption}
+                      onChange={selectOption}
                     />
                     <QuantitySelector
-                      stock={displayStock}
-                      quantity={inputValue}
-                      onIncrease={handleIncrease}
-                      onDecrease={handleDecrease}
-                      onChange={setQuantity}
-                      onShow={canSetQuantity}
+                      stock={stock}
+                      count={count}
+                      onIncrease={increase}
+                      onDecrease={decrease}
+                      onShow={hasOneVariant}
                     />
-                    {hasError.isError && (
+                    {cart_error && (
                       <div className={s["error--not-enough-option"]}>
-                        {hasError.message}
+                        {cart_error.message}
                       </div>
                     )}
                   </div>
@@ -282,7 +83,7 @@ export function ProductDetailPage() {
                     <div className="flex">
                       {/* Add to cart */}
                       <button
-                        onClick={() => handleAddToCart()}
+                        onClick={() => addToCart(variantId, count)}
                         className="purchase__button purchase__button-add-to-cart"
                       >
                         <span style={{ marginRight: "5px" }}>
@@ -301,9 +102,9 @@ export function ProductDetailPage() {
                         <span>Add To Cart</span>
                       </button>
                       {/* Buy now */}
-                      <button className="purchase__button purchase__button-buy-now">
+                      {/* <button className="purchase__button purchase__button-buy-now">
                         Buy Now
-                      </button>
+                      </button> */}
                     </div>
                   </div>
                 </div>
@@ -311,13 +112,13 @@ export function ProductDetailPage() {
             </Provider>
           </div>
           <ProductOverview
-            category={product.categoryName}
-            description={product.description}
+            category={products?.data?.categoryName}
+            description={products?.data?.description}
           />
         </div>
       )}
-      {/* MODAL */}
-      {isSuccess && (
+      {/* Modal */}
+      {cart_modal && (
         <div className={s["add-to-cart__modal"]}>
           <div
             className="flex flex-col items-center justify-center "

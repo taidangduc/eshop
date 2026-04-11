@@ -2,13 +2,13 @@ import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./styles/global.css";
 import "./styles/index.css";
-import { Providers } from "./app/providers";
-import Root from "./app/root";
+import { Provider } from "./app/provider";
+import { AppRouter } from "./app/router";
 
 createRoot(document.getElementById("main")).render(
   <React.StrictMode>
-    <Providers>
-      <Root />
-    </Providers>
+    <Provider>
+      <AppRouter />
+    </Provider>
   </React.StrictMode>
 );

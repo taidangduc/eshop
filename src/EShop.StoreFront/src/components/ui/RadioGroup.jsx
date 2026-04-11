@@ -1,5 +1,5 @@
 import { forwardRef } from "react";
-import Checkbox from "../Checkbox/Checkbox";
+import Checkbox from "./Checkbox/Checkbox";
 
 const RadioButton = forwardRef(
   ({ checked, onChange, children, className, ...props }, ref) => {
@@ -15,7 +15,7 @@ const RadioButton = forwardRef(
         {children}
       </Checkbox>
     );
-  }
+  },
 );
 
 RadioButton.displayName = "RadioButton";
@@ -42,4 +42,3 @@ const RadioGroup = ({ items, value, onChange, className, buttonClassName }) => {
 };
 
 export { RadioButton, RadioGroup };
-export default RadioGroup;

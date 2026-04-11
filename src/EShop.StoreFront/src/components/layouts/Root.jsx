@@ -1,14 +1,14 @@
 import { Outlet } from "react-router-dom";
-import NavBar from "./components/Navbar/Navbar";
-import Header from "./components/Header/Header";
+import { NavbarLayout } from "./Navbar";
+import { HeaderLayout } from "./Header";
 
-export default function RootLayout() {
+export function RootLayout() {
   return (
     <div id="main">
       <div className="flex flex-col">
         <header>
-          <NavBar />
-          <Header />
+          <NavbarLayout />
+          <HeaderLayout />
         </header>
         <main style={{ marginTop: "120px" }}>
           <Outlet />

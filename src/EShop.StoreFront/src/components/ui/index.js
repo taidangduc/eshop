@@ -2,7 +2,7 @@ export { default as Checkbox } from "./Checkbox/Checkbox";
 export { PageLoading } from "./Loading/PageLoading";
 export { default as Modal } from "./Modal/Modal";
 export { Pagination } from "./Pagination/Pagination";
-export { default as RadioGroup } from "./RadioGroup/RadioGroup";
+export { RadioGroup } from "./RadioGroup/";
 export { Skeleton } from "./Skeleton/Skeleton";
 export { CardSkeleton } from "./Skeleton/CardSkeleton";
 export { TextSkeleton } from "./Skeleton/TextSkeleton";
@@ -16,4 +16,4 @@ export {
   TableRow,
   TableCell,
 } from "./Table";
-export { Image } from './Image/Image'
+export { Image } from "./Image";

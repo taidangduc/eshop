@@ -1,6 +1,6 @@
-import NavBar from "@/components/layouts/storefront/components/Navbar/Navbar";
 import s from "./index.module.css";
 import clsx from "clsx";
+
 import {
   Modal,
   Table,
@@ -20,6 +20,7 @@ import {
   BasketEmpty,
   BasketHeader,
 } from "@features/basket/components/index";
+import { NavbarLayout } from "../../components/layouts/Navbar";
 
 export function BasketPage() {
   const navigate = useNavigate();
@@ -57,8 +58,7 @@ export function BasketPage() {
       createdAt: new Date().toDateString(),
       lastModified: null,
     },
-  });
-
+  }); 
   // mutation basket state
   const updateMutation = useMutation({
     mutationFn: ({ variantId, quantity }) => updateBasket(variantId, quantity),
@@ -185,7 +185,7 @@ export function BasketPage() {
 
   return (
     <div>
-      <NavBar />
+      <NavbarLayout />
       <BasketHeader />
       <div>
         <div className="mx-auto container-wrapper">

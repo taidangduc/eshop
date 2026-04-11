@@ -58,7 +58,7 @@ export const CheckoutStatusPage = () => {
     return (
       <>
         <div className={s["w4p-container"]}>
-          <div className={s["w4p-wrapper"]}>
+          <div className={s["w4p-wrapper"]}> 
             <div className={s["w4p-box"]}>
               <div className={s["w4p-box__subtitle"]}>
                 <p>
