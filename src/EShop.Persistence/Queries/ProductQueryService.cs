@@ -43,6 +43,10 @@ public class ProductQueryService : IProductQueryService
             return new();
         }
 
+        // NOTE: all for one
+        // if a variant with option, all variants of the product should have option,  // VARIANT SUMMARY
+        // if a variant without option, just a variant of the product, and without option
+
         // VARIANT SUMMARY
         var variantSummary = await (
             from v in _dbContext.Set<Variant>()
@@ -50,6 +54,10 @@ public class ProductQueryService : IProductQueryService
             group v by v.ProductId into g
             select new VariantSummary
             {
+                // default variant id when variant without option
+                // if a variant with option, check condition HasOption
+                VariantId = g.OrderBy(v => v.Price).Select(v => v.Id).FirstOrDefault(),
+                HasOption = g.Any(v => v.OptionValues.Any()),
                 MinPrice = g.Min(x => x.Price),
                 MaxPrice = g.Max(x => x.Price),
                 TotalStock = g.Sum(x => x.Quantity)
@@ -100,6 +108,7 @@ public class ProductQueryService : IProductQueryService
     // ref: https://learn.microsoft.com/en-us/dotnet/csharp/linq/standard-query-operators/join-operations#emulate-a-left-outer-join
     public async Task<List<ProductOverview>> GetProductsAsync(CancellationToken cancellationToken = default)
     {
+
         var productOveriew =
             from p in _dbContext.Set<Product>()
             where !p.IsDeleted && p.Status == ProductStatus.Published
@@ -117,6 +126,7 @@ public class ProductQueryService : IProductQueryService
                 Description = p.Description,
                 CategoryId = p.CategoryId,
                 Price = minPrice ?? 0,
+
                 Thumbnail = p.Images.Where(x => x.IsMain).Select(x => x.ImageUrl).FirstOrDefault() ?? string.Empty
             };
 

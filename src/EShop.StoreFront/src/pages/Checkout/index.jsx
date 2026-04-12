@@ -1,11 +1,7 @@
 import s from "./index.module.css";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
-import { useMutation, useQuery } from "@tanstack/react-query";
-import { useNavigate } from "react-router-dom";
-import { getBasket } from "@features/basket/api";
 import { formatCurrency } from "@/lib/format";
-import { createOrder, createPaymentUrl } from "@/features/checkout/api";
 import { Modal } from "@/components/ui";
 import {
   CheckoutHeader,
@@ -13,136 +9,47 @@ import {
   CheckoutSummary,
   PaymentMethod,
 } from "@features/checkout/components";
-
 import { NavbarLayout } from "../../components/layouts/Navbar";
+import { useBasket } from "../../features/basket/hook";
+import { PAYMENT_PROVIDERS } from "../../features/checkout/type";
+import { useCheckout } from "../../features/checkout/hook";
 
 export function CheckoutPage() {
-  const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
+  const [showGlobalModal, setShowGlobalModal] = useState(false);
 
-  const handleOrderSuccess = async (res) => {
-    console.log("order response:", res);
-    // If online payment selected (method === 2) and provider is not 0, create payment URL and redirect
-    if (paymentProvider?.method === 2 && paymentProvider?.provider !== 0) {
-      try {
-        const orderNumber = res?.orderNumber;
-        const amount = res?.amount || 0;
+  const { basket, totalPrice } = useBasket();
 
-        const resp = await createPaymentUrl(
-          orderNumber,
-          amount,
-          res?.paymentProvider,
-        );
-
-        var payment = resp?.data;
-
-        if (!payment.status) {
-          setIsValid(true);
-          console.log("error:", payment.error);
-        }
-        const paymentUrl = payment?.data || "";
-        if (paymentUrl) {
-          window.location.href = paymentUrl;
-        }
-      } catch (err) {
-        setIsValid(true);
-        console.error("createPaymentUrl error:", err);
-      }
-    }
-
-    navigate("/checkout/result?orderNumber=" + res?.orderNumber);
-  };
-  const handleOrderFailure = () => {
-    setIsValid(true);
-    // navigate("/checkout/result?status=failure");
-  };
-
-  //* VARIABLES
-  const PAYMENT_PROVIDERS = [
-    { id: "cod", label: "Cash on Delivery", method: 1, provider: 0 },
-    { id: "vnpay", label: "VnPay", method: 2, provider: 1 },
-    { id: "stripe", label: "Stripe", method: 2, provider: 2 },
-  ];
-  const initialAddress = {
-    fullname: "",
-    phoneNumber: "",
-    city: "",
-    zipCode: "",
-    street: "",
-  };
-
-  //* HOOKS
-  const [open, setOpen] = useState(false);
-
-  const [paymentMethod, setPaymentMethod] = useState(PAYMENT_PROVIDERS[0].id);
-  const [paymentProvider, setPaymentProvider] = useState(PAYMENT_PROVIDERS[0]);
-
-  const [shippingAddress, setShippingAddress] = useState(initialAddress);
-  const [formValidated, setFormValidated] = useState(false);
-  const [isValid, setIsValid] = useState(false);
-  const [orderProcessing, setOrderProcessing] = useState(false);
-
-  const handleChangePayment = (methodId) => {
-    setPaymentMethod(methodId);
-    const selectedProvider = PAYMENT_PROVIDERS.find((p) => p.id === methodId);
-    setPaymentProvider(selectedProvider);
-  };
-
-  // get basket item, set init data
-  const { data: basket } = useQuery({
-    queryKey: ["basket"],
-    queryFn: () => getBasket().then((res) => res.data),
-    retry: false,
-    refetchOnWindowFocus: false,
-    initialData: {
-      id: "",
-      customerId: "",
-      items: [],
-      createdAt: new Date().toDateString(),
-      lastModified: null,
-    },
-  });
-  // mutation price: reduce(func, initValue)
-  const totalPrice = basket.items?.reduce(
-    (sum, item) => (sum = sum + item.price * item.quantity),
-    0,
-  );
+  const {
+    error,
+    placeOrder,
+    changePayment,
+    validated,
+    setValidated,
+    paymentMethod,
+    shippingAddress,
+    setShippingAddress,
+  } = useCheckout();
 
   // first load page: open modal if no validated
   useEffect(() => {
-    if (!formValidated) {
-      setOpen(true); //open modal
+    if (!validated) {
+      setShowModal(true);
     }
   }, []);
 
-  const hasEmptyField = Object.values(shippingAddress).some(
-    (value) => !value || value.trim() === "",
-  );
+  useEffect(() => {
+    if (error) {
+      setShowGlobalModal(true);
+    }
+  }, [error]);
 
-  const mutationPlaceOrder = useMutation({
-    mutationFn: ({ customerId, method, provider, street, city, zipCode }) =>
-      createOrder(customerId, method, provider, street, city, zipCode),
-    onSuccess: (res) => {
-      handleOrderSuccess(res.data);
-      console.log("order success");
-    },
-    onError: (err) => {
-      handleOrderFailure();
-      console.log("order error: ", err);
-    },
-  });
+  const handleChangePayment = (methodId) => {
+    changePayment(methodId);
+  };
 
   const handlePlaceOrder = async () => {
-    if (hasEmptyField) return;
-    if (basket.customerId === "");
-
-    mutationPlaceOrder.mutate({
-      customerId: basket.customerId,
-      method: paymentProvider.method,
-      provider: paymentProvider.provider,
-      street: shippingAddress.street,
-      city: shippingAddress.city,
-      zipCode: shippingAddress.zipCode,
-    });
+    placeOrder({ customerId: basket?.customerId });
   };
 
   return (
@@ -159,21 +66,18 @@ export function CheckoutPage() {
           className="container-wrapper mx-auto"
           style={{ fontSize: "14px", lineHeight: "16.8px" }}
         >
-          {/* SHIPPING ADDRESS*/}
           <ShippingAddress
-            isOpen={open}
-            onSetOpen={setOpen}
-            address={shippingAddress}
-            status={formValidated}
-            onSetStatus={setFormValidated}
-            onSubmitAddress={setShippingAddress}
+            isShowModal={showModal}
+            onSetShowModal={setShowModal}
+            data={shippingAddress}
+            status={validated}
+            onSetStatus={setValidated}
+            onSubmit={setShippingAddress}
           />
-          {/* CHECKOUT CONTENT */}
           <div style={{ marginTop: "12px", backgroundColor: "white" }}>
             <CheckoutSummary items={basket?.items} />
           </div>
           <div className={s["checkout-section__footer"]}>
-            {/* PAYMENT SECTION  */}
             <div className={s["checkout-footer-with-payment-section"]}>
               <PaymentMethod
                 items={PAYMENT_PROVIDERS}
@@ -218,9 +122,9 @@ export function CheckoutPage() {
           </div>
         </div>
       </div>
-      {/* MODAL */}
-      {isValid && (
-        <Modal open={isValid} onClose={() => setIsValid(false)}>
+      {/* GLOBAL MODAL */}
+      {error && (
+        <Modal open={showGlobalModal} onClose={() => setShowGlobalModal(false)}>
           <div className={s["w4p-container"]}>
             <div className={s["w4p-wrapper"]}>
               <div className={s["w4p-box"]}>
@@ -239,7 +143,7 @@ export function CheckoutPage() {
                 </div>
                 <div className="flex w-100">
                   <button
-                    onClick={() => setIsValid(false)}
+                    onClick={() => setShowGlobalModal(false)}
                     className={s["w4p__button"]}
                   >
                     OK, got it

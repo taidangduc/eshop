@@ -10,7 +10,6 @@ export function CheckoutItem({ item }) {
   return (
     <div className={s["checkout-item"]}>
       <TableRow>
-        {/* Product with Image and Name */}
         <TableCell
           className={clsx(s["checkout-content-table__col--main"])}
           flex="4 1 0%"
@@ -26,8 +25,6 @@ export function CheckoutItem({ item }) {
             <span className={clsx("ellipsis")}>{item.title}</span>
           </span>
         </TableCell>
-
-        {/* Variant */}
         <TableCell
           className={clsx(
             s["checkout-content-table__col--sub"],
@@ -44,8 +41,6 @@ export function CheckoutItem({ item }) {
             </span>
           )}
         </TableCell>
-
-        {/* Unit Price */}
         <TableCell
           className={s["checkout-content-table__col--sub"]}
           flex="2 1 0%"
@@ -53,8 +48,6 @@ export function CheckoutItem({ item }) {
         >
           {formatCurrency(item.price)}
         </TableCell>
-
-        {/* Quantity */}
         <TableCell
           className={s["checkout-content-table__col--sub"]}
           flex="2 1 0%"
@@ -62,8 +55,6 @@ export function CheckoutItem({ item }) {
         >
           {item.quantity}
         </TableCell>
-
-        {/* Item Subtotal */}
         <TableCell
           className={s["checkout-content-table__col--sub"]}
           flex="2 1 0%"

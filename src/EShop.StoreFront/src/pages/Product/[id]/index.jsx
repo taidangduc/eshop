@@ -31,7 +31,7 @@ export function ProductDetailPage() {
 
   const hasOneVariant = variantId !== null;
   const limitPhoto = 5;
-
+  
   return (
     <>
       {products && (

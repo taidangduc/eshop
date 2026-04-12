@@ -1,6 +1,7 @@
 using EShop.Application.Baskets.Services;
-using EShop.Application.Variants.Services;
 using EShop.Application.Orders.DTOs;
+using EShop.Application.Payments.Services;
+using EShop.Application.Variants.Services;
 using EShop.Domain.Entities;
 using EShop.Domain.Enums;
 using EShop.Domain.Exceptions;
@@ -17,25 +18,28 @@ public record CreateOrderCommand(
     PaymentProvider Provider,
     string Street,
     string City,
-    string ZipCode) : IRequest<CreateOrderResult>;
+    string ZipCode) : IRequest<PlaceOrderDto>;
 
-internal class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, CreateOrderResult>
+internal class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, PlaceOrderDto>
 {
     private readonly IOrderRepository _orderRepository;
     private readonly IVariantService _variantService;
     private readonly IBasketService _basketService;
+    private readonly IPaymentService _paymentService;
 
     public CreateOrderCommandHandler(
         IOrderRepository orderRepository,
         IVariantService variantService,
-        IBasketService basketService)
+        IBasketService basketService,
+        IPaymentService paymentService)
     {
         _orderRepository = orderRepository;
         _variantService = variantService;
         _basketService = basketService;
+        _paymentService = paymentService;
     }
 
-    public async Task<CreateOrderResult> Handle(CreateOrderCommand command, CancellationToken cancellationToken)
+    public async Task<PlaceOrderDto> Handle(CreateOrderCommand command, CancellationToken cancellationToken)
     {
         var basketItems = await _basketService.GetBasketAsync(command.CustomerId);
 
@@ -75,7 +79,6 @@ internal class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, C
             throw new Exception("COD does not use provider");
         }
 
-
         if (command.Method == PaymentMethod.Online && command.Provider == PaymentProvider.Unknown)
         {
             throw new Exception("Online payment requires provider");
@@ -94,14 +97,24 @@ internal class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, C
         await _orderRepository.AddAsync(order);
         await _orderRepository.UnitOfWork.SaveChangesAsync();
 
-        return new CreateOrderResult
+        string? paymentUrl = "";
+        if (command.Method == PaymentMethod.Online)
+        {
+            var paymentSession = await _paymentService.CreatePaymentSessionAsync(new CreatePaymentSession
+            {
+                OrderNumber = order.OrderNumber,
+                Amount = totalAmount.Amount,
+                Provider = command.Provider
+            }, cancellationToken);
+
+            paymentUrl = paymentSession;
+        }
+
+        return new PlaceOrderDto
         {
             OrderId = order.Id,
             OrderNumber = order.OrderNumber,
-            Amount = order.TotalAmount.Amount,
-            CustomerId = order.CustomerId,
-            PaymentMethod = order.PaymentMethod,
-            PaymentProvider = order.PaymentProvider,
+            PaymentUrl = paymentUrl
         };
     }
 }

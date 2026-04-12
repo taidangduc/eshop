@@ -19,22 +19,17 @@ public class GetOrderByOrderNumberQueryHandler : IRequestHandler<GetOrderByOrder
     {
         var order = await _orderRepository.GetByOrderNumber(request.OrderNumber);
 
-        return order is not null ? MapToCheckoutOrderDto(order) : new();
+        return order is not null ? DomainToDtoMapper.MapToCheckoutOrderDto(order) : new();
     }
 
-    private CheckoutOrderDto MapToCheckoutOrderDto(Domain.Entities.Order order)
-    {
-        return new CheckoutOrderDto
-        {
-            Id = order.Id,
-            OrderNumber = order.OrderNumber,
-            TotalAmount = order.TotalAmount.Amount,
-            Status = order.Status,
-            Currency = order.TotalAmount.Currency.ToString(),
-            OrderDate = order.OrderDate,
-            CustomerId = order.CustomerId,
-            PaymentMethod = order.PaymentMethod,
-            PaymentProvider = order.PaymentProvider
-        };
-    }
+    // private CheckoutOrderDto MapToCheckoutOrderDto(Domain.Entities.Order order)
+    // {
+    //     return new CheckoutOrderDto
+    //     {
+    //         Id = order.Id,
+    //         OrderNumber = order.OrderNumber,
+    //         Status = order.Status,
+    //         OrderDate = order.OrderDate
+    //     };
+    // }
 }

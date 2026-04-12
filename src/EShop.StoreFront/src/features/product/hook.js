@@ -52,12 +52,15 @@ export function useProduct(productId) {
 
   // get variantId for add to cart
   const variantId = useMemo(() => {
-    // if product just have 1 variant, we can auto select it
-    // if variant > 1, products.variantSummary.variantId = null
-    if (products?.data?.variantSummary?.variantId) {
+    // product detail, get default variant id and check hasOption
+    if (
+      products?.data?.variantSummary?.variantId &&
+      products?.data?.variantSummary?.hasOption === false
+    ) {
       return products.data.variantSummary.variantId;
     }
     // if user select all options, we can get variantId from variants
+    // when filter variant by options, if only one variant, we can get variantId directly
     if (variants?.data.variants?.length === 1) {
       return variants.data.variants[0].id;
     }

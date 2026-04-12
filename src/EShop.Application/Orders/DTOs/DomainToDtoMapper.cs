@@ -27,4 +27,26 @@ public static class DomainToDtoMapper
             Status = order.Status
         };
     }
+
+    public static OrderStatusDto MapToOrderStatusDto(Domain.Entities.Order order)
+    {
+        return new OrderStatusDto
+        {
+            Id = order.Id,
+            OrderNumber = order.OrderNumber,
+            Status = order.Status
+        };
+    }
+
+    public static CheckoutOrderDto MapToCheckoutOrderDto(Domain.Entities.Order order)
+    {
+        return new CheckoutOrderDto
+        {
+            Id = order.Id,
+            OrderNumber = order.OrderNumber,
+            Status = order.Status,
+            OrderDate = order.OrderDate
+        };
+    }
+
 }

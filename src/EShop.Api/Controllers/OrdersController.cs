@@ -34,8 +34,23 @@ public class OrdersController(IMediator mediator) : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("checkout/{orderNumber}")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> GetOrderCheckout(long orderNumber, CancellationToken cancellationToken)
+    {
+        var result = await mediator.Send(new GetOrderByOrderNumberQuery(orderNumber), cancellationToken);
+
+        if (result == default)
+        {
+            return NotFound();
+        }
+
+        return Ok(result);
+    }
+
     [HttpPost]
-    [ProducesResponseType(typeof(CreateOrderResult), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(Guid), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> CreateOrder([FromBody] CreateOrderModel request, CancellationToken cancellationToken)
     {
@@ -43,7 +58,7 @@ public class OrdersController(IMediator mediator) : ControllerBase
 
         var result = await mediator.Send(command, cancellationToken);
 
-        return CreatedAtAction(nameof(GetOrderById), new { id = result.OrderId }, result);
+        return Ok(result);
     }
 
     [HttpPut]

@@ -43,7 +43,7 @@ public class OrderRepository : Repository<Order, Guid>, IOrderRepository
         return await _dbContext.Set<Order>()
             .SingleOrDefaultAsync(x => x.OrderNumber == orderNumber);
     }
-
+    
     public async Task<List<Guid>> GetConfirmedGracePeriodOrdersAsync(CancellationToken cancellationToken = default)
     {
         try

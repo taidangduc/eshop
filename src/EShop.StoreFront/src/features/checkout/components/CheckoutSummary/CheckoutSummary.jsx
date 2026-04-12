@@ -10,14 +10,13 @@ import {
 } from "@/components/ui";
 
 export function CheckoutSummary({ items = [] }) {
-  const totalResult = items?.reduce(
+  const totalPrice = items?.reduce(
     (sum, item) => (sum = sum + item.price * item.quantity),
     0,
   );
 
   return (
     <div>
-      {/* Table Container */}
       <div
         className={clsx(
           s["checkout-content-table__row"],
@@ -30,7 +29,6 @@ export function CheckoutSummary({ items = [] }) {
             s["checkout-content"],
           )}
         >
-          {/* Table Header */}
           <TableHeader>
             <TableHeaderCell
               className={clsx(
@@ -109,7 +107,7 @@ export function CheckoutSummary({ items = [] }) {
               <div>Order Total ({items.length} Items):</div>
             </h3>
             <div className={s["checkout-total__price"]}>
-              {formatCurrency(totalResult)}
+              {formatCurrency(totalPrice)}
             </div>
           </div>
         </div>

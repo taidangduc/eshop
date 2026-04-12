@@ -24,20 +24,19 @@ export const CheckoutStatusPage = () => {
       return;
     }
 
-    const loadCheckoutOrder = async () => {
+    const fetchOrderCheckout = async () => {
       try {
         const res = await getCheckoutOrder(orderNumber);
         if (res.status !== 200) {
           setShowError(true);
           return;
         }
-        console.log("checkoutResult", res.data);
       } catch (err) {
         setShowError(true);
         return;
       }
     };
-    loadCheckoutOrder();
+    fetchOrderCheckout();
   }, [orderNumber]);
 
   // page load
@@ -58,7 +57,7 @@ export const CheckoutStatusPage = () => {
     return (
       <>
         <div className={s["w4p-container"]}>
-          <div className={s["w4p-wrapper"]}> 
+          <div className={s["w4p-wrapper"]}>
             <div className={s["w4p-box"]}>
               <div className={s["w4p-box__subtitle"]}>
                 <p>

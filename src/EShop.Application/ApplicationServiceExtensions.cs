@@ -9,6 +9,7 @@ using EShop.Application.FileEntries.Services;
 using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using EShop.Application.Orders.Services;
+using EShop.Application.Payments.Services;
 
 namespace EShop.Application;
 
@@ -22,6 +23,7 @@ public static class ApplicationServiceExtensions
         services.AddScoped<IVariantService, VariantService>();
         services.AddScoped<IFileEntryService, FileEntryService>();
         services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<IPaymentService, PaymentService>();
 
         // MediatR
         services.AddMediatR(cfg =>

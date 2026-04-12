@@ -47,7 +47,7 @@ export function useBasket() {
         },
         onSuccess: () => {
           setOpen(true);
-
+          setError(null);
           setTimeout(() => {
             setOpen(false);
           }, 1000);

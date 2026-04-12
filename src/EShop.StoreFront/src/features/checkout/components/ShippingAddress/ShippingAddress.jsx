@@ -5,31 +5,31 @@ import { ShippingAddressModal } from "./ShippingAddressModal";
 import { useNavigate } from "react-router-dom";
 
 export function ShippingAddress({
-  isOpen,
-  onSetOpen,
-  address,
-  onSubmitAddress,
+  isShowModal,
+  onSetShowModal,
+  data,
+  onSubmit,
   status,
   onSetStatus,
 }) {
   const navigate = useNavigate();
 
   // function
-  const onSubmit = (data) => {
-    onSetOpen(false);
-    onSubmitAddress(data);
+  const handleSubmit = (x) => {
+    onSetShowModal(false);
+    onSubmit(x);
     onSetStatus(true);
   };
 
   const handleCancel = () => {
     if (status) {
-      onSetOpen(false);
+      onSetShowModal(false);
     } else {
       navigate("/cart");
     }
   };
 
-  const { fullname, phoneNumber, city, zipCode, street } = address;
+  const { fullname, phoneNumber, city, zipCode, street } = data;
 
   return (
     <>
@@ -76,7 +76,7 @@ export function ShippingAddress({
             <button
               className={s["shipping-address__button"]}
               type="button"
-              onClick={() => onSetOpen(true)}
+              onClick={() => onSetShowModal(true)}
             >
               <span>Change</span>
             </button>
@@ -84,12 +84,12 @@ export function ShippingAddress({
         </div>
       </div>
       {/* Modals */}
-      <Modal open={isOpen}>
+      <Modal open={isShowModal}>
         <ShippingAddressModal
-          isOpen={isOpen}
-          onSetOpen={onSetOpen}
-          address={address}
-          onSubmitAddress={onSubmit}
+          isShowModal={isShowModal}
+          onSetShowModal={onSetShowModal}
+          data={data}
+          onSubmit={handleSubmit}
           onCancel={handleCancel}
         />
       </Modal>

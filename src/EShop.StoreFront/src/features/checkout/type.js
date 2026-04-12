@@ -5,13 +5,16 @@ export const PAYMENT_PROVIDERS = [
 ];
 
 export const SHIPPING_ADDRESS_MODEL = {
-  id: 0,
-  name: "",
-  phone: "",
-  address: "",
+  fullname: "",
+  phoneNumber: "",
   city: "",
-  state: "",
-  zip: "",
+  zipCode: "",
+  street: "",
+};
+
+export const PAYMENT_MODEL = {
+  method: 1,
+  provider: 0,
 };
 
 export const CHECKOUT_MODEL = {

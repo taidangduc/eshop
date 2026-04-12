@@ -7,10 +7,10 @@ import { TextField } from "@/components/ui";
 import { useEffect } from "react";
 
 export function ShippingAddressModal({
-  isOpen,
-  onSetOpen,
-  address,
-  onSubmitAddress,
+  isShowModal,
+  onShowModal,
+  data,
+  onSubmit,
   onCancel,
 }) {
   // REACT HOOK FORM
@@ -26,17 +26,17 @@ export function ShippingAddressModal({
   });
   // SIDE-EFFECT
   useEffect(() => {
-    if (isOpen) {
-      reset(address);
+    if (isShowModal) {
+      reset(data);
     }
-  }, [isOpen, address, reset]);
+  }, [isShowModal, data, reset]);
 
   return (
     <div className="z-1">
       <div className={s["shipping-address__modal-section"]}>
         <div className={s["shipping-address__modal"]}>
           <div className={s["shipping-address__modal-title"]}>New Address</div>
-          <form onSubmit={handleSubmit(onSubmitAddress)}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <div className={s["shipping-address__modal-container"]}>
               <div className={s["shipping-address__form-content"]}>
                 {/* FULLNAME AND PHONE NUMBER */}

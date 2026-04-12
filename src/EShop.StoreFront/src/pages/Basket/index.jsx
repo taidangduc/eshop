@@ -228,7 +228,7 @@ export function BasketPage() {
           </h2>
           <div className="text-[16px]">
             <span>{pendingDelete?.title} </span>
-            <span>({pendingDelete?.name})</span>
+            {pendingDelete?.name && <span>({pendingDelete?.name})</span>}
           </div>
           <div className="flex w-full pt-[60px]">
             <button
@@ -237,7 +237,7 @@ export function BasketPage() {
                 color: "white",
                 borderRadius: "2px",
               }}
-              className=" flex-1 m-1 h-[40px]"
+              className="flex-1 m-1 h-[40px]"
               onClick={() => {
                 confirmDelete();
               }}

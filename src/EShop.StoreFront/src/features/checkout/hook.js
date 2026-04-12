@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { getCheckoutOrder, createOrder, createPaymentUrl } from "./api";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { getCheckoutOrder, createOrder } from "./api";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
-import { PAYMENT_PROVIDERS, CHECKOUT_MODEL } from "./type";
+import { PAYMENT_PROVIDERS, SHIPPING_ADDRESS_MODEL } from "./type";
 
 export function useCheckout() {
   const mutation = useUpdateCheckout();
@@ -10,71 +10,55 @@ export function useCheckout() {
   const navigate = useNavigate();
 
   const [error, setError] = useState(null);
-  const [checkoutData, setCheckoutData] = useState(CHECKOUT_MODEL);
+  const [validated, setValidated] = useState(false);
+  const [paymentMethod, setPaymentMethod] = useState(PAYMENT_PROVIDERS[0].id);
+  const [paymentProvider, setPaymentProvider] = useState(PAYMENT_PROVIDERS[0]);
+  const [shippingAddress, setShippingAddress] = useState(
+    SHIPPING_ADDRESS_MODEL,
+  );
 
-  const changePaymentMethod = ({ methodId, provider }) => {
-    const isProvider = PAYMENT_PROVIDERS.find((p) => p.id === provider);
-    if (!isProvider) {
-      console.error("Invalid payment provider selected");
-      return;
-    }
+  const validateException = Object.values(shippingAddress).some(
+    (value) => !value || value.trim() === "",
+  );
 
-    setCheckoutData((prev) => ({
-      ...prev,
-      method: methodId,
-      provider,
-    }));
+  const changePayment = (methodId) => {
+    setPaymentMethod(methodId);
+    const provider = PAYMENT_PROVIDERS.find((p) => p.id === methodId);
+    setPaymentProvider(provider);
   };
 
   const redirectWhenSuccess = (res) => {
-    if (
-      res?.paymentProvider?.method === 2 &&
-      res?.paymentProvider?.provider !== 0
-    ) {
-      try {
-        const orderNumber = res?.orderNumber;
-        const amount = res?.amount || 0;
-        const response = createPaymentUrl(
-          orderNumber,
-          amount,
-          res?.paymentProvider,
-        );
-        var payment = response?.data;
-
-        if (!payment.status) {
-          setError(payment.error);
-        }
-        const paymentUrl = payment?.data || "";
-        if (paymentUrl) {
-          window.location.href = paymentUrl;
-        }
-      } catch {
-        setError("Failed to create payment URL. Please try again.");
-      }
-    } else {
-      navigate("/checkout/status?orderNumber=" + res?.orderNumber);
+    if (res?.data?.paymentUrl) {
+      window.location.href = res.data.paymentUrl;
+      return;
     }
+    navigate("/checkout/status?orderNumber= " + res?.data?.orderNumber);
   };
 
   const showErrorWhenFailure = () => {
     setError("Failed to place order. Please try again.");
   };
 
-  const placeOrder = ({
-    customerId,
-    method,
-    provider,
-    street,
-    city,
-    zipCode,
-  }) => {
-    if (!customerId || !method || !provider || !street || !city || !zipCode) {
-      console.error("Missing required fields for placing order");
+  const placeOrder = ({ customerId }) => {
+    if (customerId === null) {
+      setError("Invalid customer. Please log in again.");
+      return;
+    }
+
+    if (validateException) {
+      setError("Please fill in all required fields.");
       return;
     }
 
     mutation.mutate(
-      { customerId, method, provider, street, city, zipCode },
+      {
+        customerId: customerId,
+        method: paymentProvider.method,
+        provider: paymentProvider.provider,
+        street: shippingAddress.street,
+        city: shippingAddress.city,
+        zipCode: shippingAddress.zipCode,
+      },
       {
         onSuccess: (res) => {
           redirectWhenSuccess(res);
@@ -86,25 +70,29 @@ export function useCheckout() {
     );
   };
   return {
-    checkoutData,
     error,
-    changePaymentMethod,
     placeOrder,
+    changePayment,
+    validated,
+    setValidated,
+    paymentMethod,
+    paymentProvider,
+    shippingAddress,
+    setShippingAddress,
   };
 }
 
 export function useUpdateCheckout() {
-  const queryClient = useQueryClient();
+  //const queryClient = useQueryClient();
   return useMutation({
     mutationFn: ({ customerId, method, provider, street, city, zipCode }) =>
       createOrder(customerId, method, provider, street, city, zipCode),
-    onSuccess: () => {
-      // Invalidate and refetch
-      queryClient.invalidateQueries({ queryKey: ["checkout"] });
-    },
-    onError: (error) => {
-      console.error("Error creating order:", error);
-    },
+    // onSuccess: () => {
+    //   queryClient.invalidateQueries({ queryKey: ["checkout"] });
+    // },
+    // onError: (error) => {
+    //   console.error("Error creating order:", error);
+    // },
   });
 }
 
@@ -115,7 +103,7 @@ export function useCheckoutStatus(orderNumber) {
 
 export function useCheckoutStatusQuery(orderNumber) {
   return useQuery({
-    queryKey: ["checkout", orderNumber],
+    queryKey: ["checkout_status", orderNumber],
     queryFn: () => getCheckoutOrder(orderNumber),
     enabled: !!orderNumber,
   });

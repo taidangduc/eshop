@@ -23,6 +23,17 @@ export const createOrder = (
     zipCode: _zipCode,
   });
 
+export const placeOrder = (customerId, paymentMethod, shippingAddress) => {
+  return authClient.post(`/api/v1/orders`, {
+    customerId,
+    method: paymentMethod.method,
+    provider: paymentMethod.provider,
+    street: shippingAddress.street,
+    city: shippingAddress.city,
+    zipCode: shippingAddress.zipCode,
+  });
+};
+
 export const createPaymentUrl = (_orderNumber, _amount, _provider) =>
   apiClient.post(`/api/v1/payment/create`, {
     orderNumber: _orderNumber,
