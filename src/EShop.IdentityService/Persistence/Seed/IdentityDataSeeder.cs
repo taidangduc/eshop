@@ -1,10 +1,10 @@
-using EShop.Contracts.IntegrationEvents;
 using EShop.IdentityService.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using EShop.Migrator;
 using EShop.Infrastructure.Identity;
-using EShop.EventBus;
+using EShop.Contracts.Customer.Services;
+using EShop.Contracts.Customer.DTOs;
 
 namespace EShop.IdentityService.Persistence.Seed;
 
@@ -12,15 +12,15 @@ public class IdentityDataSeeder : IDataSeeder<IdentityDbContext>
 {
     private readonly RoleManager<Role> _roleManager;
     private readonly UserManager<User> _userManager;
-    private readonly IEventBus _eventBus;
+    private readonly ICustomerService _customerService;
     public IdentityDataSeeder(
         RoleManager<Role> roleManager,
         UserManager<User> userManager,
-        IEventBus eventBus)
+        ICustomerService customerService)
     {
         _roleManager = roleManager;
         _userManager = userManager;
-        _eventBus = eventBus;
+        _customerService = customerService;
     }
     public async Task SeedAsync(CancellationToken cancellationToken)
     {
@@ -54,10 +54,10 @@ public class IdentityDataSeeder : IDataSeeder<IdentityDbContext>
                 if (result.Succeeded)
                 {
                     await _userManager.AddToRoleAsync(IdentityData.Users.First(), Authorization.Roles.Admin);
-                    await _eventBus.SendAsync(new UserCreatedEvent
+                    await _customerService.CreateAsync(new CreateCustomerModel
                     {
                         UserId = IdentityData.Users.First().Id,
-                        Email = IdentityData.Users.First().Email!
+                        Email = IdentityData.Users.First().Email!,
                     });
                 }
             }
@@ -68,7 +68,7 @@ public class IdentityDataSeeder : IDataSeeder<IdentityDbContext>
                 if (result.Succeeded)
                 {
                     await _userManager.AddToRoleAsync(IdentityData.Users.Last(), Authorization.Roles.User);
-                    await _eventBus.SendAsync(new UserCreatedEvent
+                    await _customerService.CreateAsync(new CreateCustomerModel
                     {
                         UserId = IdentityData.Users.Last().Id,
                         Email = IdentityData.Users.Last().Email!

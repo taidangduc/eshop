@@ -1,4 +1,3 @@
-using EShop.EventBus.RabbitMQ;
 using EShop.Infrastructure.Notification;
 using EShop.Infrastructure.Payment;
 using EShop.Infrastructure.Storage;
@@ -12,5 +11,4 @@ public class AppSettings
     public ConnectionStrings ConnectionStrings { get; set; }
     public NotificationOptions Notification { get; set; }
     public PaymentOptions Payment { get; set; }
-    public RabbitMQOptions RabbitMQ { get; set; }
 }

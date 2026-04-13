@@ -14,9 +14,9 @@ public static class DuendeConfigurations
     ];
 
     public static IEnumerable<ApiScope> ApiScopes => [
-        new ApiScope(AuthorizationScope.Read, "Read Access to API"),
-        new ApiScope(AuthorizationScope.Write, "Write Access to API"),
-        new ApiScope(AuthorizationScope.All, "Write and Read Access to API")
+        new ApiScope(Permission.Read, "Read Access to API"),
+        new ApiScope(Permission.Write, "Write Access to API"),
+        new ApiScope(Permission.All, "Write and Read Access to API")
     ];
 
     public static IEnumerable<ApiResource> ApiResources => [
@@ -24,7 +24,7 @@ public static class DuendeConfigurations
         {
             Name = "api.eshop",
             DisplayName = "Eshop API",
-            Scopes = {AuthorizationScope.Read, AuthorizationScope.Write},
+            Scopes = {Permission.Read, Permission.Write},
         }
     ];
 
@@ -37,7 +37,7 @@ public static class DuendeConfigurations
             ClientName = "Resource Owner Client",
             ClientSecrets = {new Secret("secret".Sha256())},
             AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
-            AllowedScopes = { AuthorizationScope.Read, AuthorizationScope.Write},
+            AllowedScopes = { Permission.Read, Permission.Write},
         },
         // Backend For Frontend
         new()
@@ -49,8 +49,8 @@ public static class DuendeConfigurations
             AllowedScopes = {
                 IdentityServerConstants.StandardScopes.OpenId,
                 IdentityServerConstants.StandardScopes.Profile,
-                AuthorizationScope.Read,
-                AuthorizationScope.Write,
+                Permission.Read,
+                Permission.Write,
             },
             AllowOfflineAccess = true,
             AllowedCorsOrigins = { "https://localhost:5002"},

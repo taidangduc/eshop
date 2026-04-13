@@ -12,7 +12,7 @@ internal class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerComm
     public CreateCustomerCommandHandler(ICustomerRepository repository)
     {
         _repository = repository;
-    }   
+    }
 
     public async Task<Guid> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
     {
@@ -20,7 +20,7 @@ internal class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerComm
         {
             Id = Guid.CreateVersion7(),
             UserId = request.UserId,
-            Email = request.Email,
+            Email = request.Email
         };
 
         await _repository.AddAsync(customer);

@@ -10,6 +10,7 @@ using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using EShop.Application.Orders.Services;
 using EShop.Application.Payments.Services;
+using EShop.Contracts.Customer.Services;
 
 namespace EShop.Application;
 

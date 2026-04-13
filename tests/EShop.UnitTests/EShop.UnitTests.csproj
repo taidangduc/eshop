@@ -17,7 +17,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\EShop.EventBus\EShop.EventBus.csproj" />
     <ProjectReference Include="..\..\src\EShop.Infrastructure\EShop.Infrastructure.csproj" />
   </ItemGroup>
 

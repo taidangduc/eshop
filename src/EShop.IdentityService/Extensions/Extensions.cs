@@ -1,16 +1,14 @@
 using Duende.IdentityServer;
-using EShop.Contracts.IntegrationEvents;
 using EShop.IdentityService.ConfigurationOptions;
 using EShop.IdentityService.ConfigurationOptions.ExternalLogin;
 using EShop.IdentityService.Configurations;
 using EShop.IdentityService.Entities;
 using Microsoft.AspNetCore.Identity;
-using EShop.EventBus;
-using EShop.EventBus.RabbitMQ;
-using System.Reflection;
 using EShop.IdentityService.Persistence;
 using EShop.Migrator;
 using EShop.IdentityService.Persistence.Seed;
+using EShop.Contracts.Customer.Services;
+using EShop.IdentityService.Services;
 
 namespace EShop.IdentityService.Extensions;
 
@@ -84,8 +82,10 @@ public static class Extensions
 
         builder.Services.AddScoped<IDataSeeder<IdentityDbContext>, IdentityDataSeeder>();
 
-        builder.Services.AddEventBus(Assembly.GetExecutingAssembly());
-        builder.Services.AddRabbitMQSender<UserCreatedEvent>(appSettings.RabbitMQ);
+        builder.Services.AddHttpClient<ICustomerService, CustomerService>(client =>
+        {
+            client.BaseAddress = new Uri(appSettings.Services.Customer.BaseUrl);
+        });
 
         return builder;
     }

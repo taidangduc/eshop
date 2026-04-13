@@ -1,10 +1,10 @@
 using EShop.Application.Variants.Services;
-using EShop.Application.Customers.Services;
 using EShop.Domain.Entities;
 using EShop.Domain.Exceptions;
 using EShop.Domain.Repositories;
 using MediatR;
 using EShop.Domain.Identity;
+using EShop.Contracts.Customer.Services;
 
 namespace EShop.Application.Baskets.Commands;
 
@@ -31,7 +31,7 @@ internal class AddOrUpdateBasketCommandHandler : IRequestHandler<AddOrUpdateBask
 
     public async Task<Guid> Handle(AddOrUpdateBasketCommand request, CancellationToken cancellationToken)
     {
-        var customer = await _customerService.GetCustomerAsync(_currentWebUser.UserId);
+        var customer = await _customerService.GetAsync(_currentWebUser.UserId);
 
         if (customer == null)
         {

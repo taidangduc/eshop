@@ -6,7 +6,6 @@ namespace EShop.Application.Baskets.Services;
 public class BasketService : IBasketService
 {
     private readonly IBasketRepository _basketRepository;
-
     public BasketService(IBasketRepository basketRepository)
     {
         _basketRepository = basketRepository;
@@ -18,6 +17,20 @@ public class BasketService : IBasketService
 
         return basket is not null ? MapToBasketCheckoutDto(basket) : new();
     }
+
+    public async Task ClearBasketAsync(Guid CustomerId)
+    {
+        var basket = await _basketRepository.GetByCustomerIdWithItemsAsync(CustomerId);
+
+        if (basket is null)
+        {
+            return;
+        }
+
+        basket.ClearItems();
+        await _basketRepository.UnitOfWork.SaveChangesAsync();
+    }
+
 
     private BasketDto MapToBasketCheckoutDto(Domain.Entities.Basket basket)
     {

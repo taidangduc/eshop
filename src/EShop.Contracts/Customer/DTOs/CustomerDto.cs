@@ -1,6 +1,6 @@
-namespace EShop.Application.Customers.DTOs;
+namespace EShop.Contracts.Customer.DTOs;
 
-public class CustomerDto 
+public class CustomerDto
 {
     public Guid Id { get; init; }
     public string? FullName { get; init; }
@@ -8,4 +8,3 @@ public class CustomerDto
     public string? PhoneNumber { get; init; }
     public string? Address { get; init; }
 }
-

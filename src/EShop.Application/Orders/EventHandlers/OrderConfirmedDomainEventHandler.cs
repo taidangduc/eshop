@@ -1,38 +1,39 @@
 using EShop.Domain.Repositories;
-using Ardalis.GuardClauses;
 using EShop.Domain.Events;
 using MediatR;
-using System.Text.Json;
-using EShop.Domain.Entities;
-using EShop.Contracts.IntegrationEvents;
+using EShop.Application.Variants.Services;
 
 namespace EShop.Application.Orders.DomainEventHandlers;
 
 public class OrderConfirmedDomainEventHandler(
     IOrderRepository orderRepository,
-    IRepository<OutboxMessage, Guid> outboxRepository)
+    IVariantService variantService)
     : INotificationHandler<OrderConfirmedDomainEvent>
 {
     private readonly IOrderRepository _orderRepository = orderRepository;
-    private readonly IRepository<OutboxMessage, Guid> _outboxRepository = outboxRepository;
+    private readonly IVariantService _variantService = variantService;
 
     public async Task Handle(OrderConfirmedDomainEvent domainEvent, CancellationToken cancellationToken)
     {
         // Logic: payment succeeded -> set order status comfirmed / paid -> reservation stock (outbox)
-
+        
         var order = await _orderRepository.GetAsync(domainEvent.OrderId);
 
-        Guard.Against.NotFound(domainEvent.OrderId, order);
-
-        var integrationEvent = new OrderConfirmedEvent { OrderId = order.Id };
-
-        var message = new OutboxMessage
+        if (order is null)
         {
-            EventType = typeof(OrderConfirmedEvent).FullName,
-            Payload = JsonSerializer.Serialize(integrationEvent),
-        };
+            return;
+        }
 
-        await _outboxRepository.AddAsync(message);
-        await _outboxRepository.UnitOfWork.SaveChangesAsync();
+        var response = await _variantService.ReserveStockAsync(domainEvent.OrderId, cancellationToken);
+
+        if(response == true)
+        {
+            order.SetConfirmedStatus();
+        }
+        else
+        {
+            order.SetRejectedStatusWhenStockRejected();
+        }
+
     }
 }

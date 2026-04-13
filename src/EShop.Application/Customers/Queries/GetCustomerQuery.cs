@@ -1,5 +1,5 @@
-using EShop.Application.Customers.DTOs;
-using EShop.Application.Customers.Services;
+using EShop.Contracts.Customer.DTOs;
+using EShop.Contracts.Customer.Services;
 using MediatR;
 
 namespace EShop.Application.Customers.Queries;
@@ -16,7 +16,7 @@ public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerQuery, Cus
     }
     public async Task<CustomerDto> Handle(GetCustomerQuery request, CancellationToken cancellationToken)
     {
-        var customer = await _customerService.GetCustomerAsync(request.UserId);
+        var customer = await _customerService.GetAsync(request.UserId);
 
         return customer;
     }

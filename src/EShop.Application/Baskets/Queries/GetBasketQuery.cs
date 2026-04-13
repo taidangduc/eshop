@@ -1,10 +1,10 @@
 using EShop.Application.Baskets.DTOs;
 using EShop.Application.Variants.Services;
-using EShop.Application.Customers.Services;
 using EShop.Domain.Exceptions;
 using EShop.Domain.Repositories;
 using MediatR;
 using EShop.Domain.Identity;
+using EShop.Contracts.Customer.Services;
 
 namespace EShop.Application.Baskets.Queries;
 
@@ -31,7 +31,7 @@ public class GetBasketQueryHandler : IRequestHandler<GetBasketQuery, BasketOverv
 
     public async Task<BasketOverview> Handle(GetBasketQuery request, CancellationToken cancellationToken)
     {
-        var customer = await _customerService.GetCustomerAsync(_currentWebUser.UserId);
+        var customer = await _customerService.GetAsync(_currentWebUser.UserId);
 
         if (customer == null)
         {

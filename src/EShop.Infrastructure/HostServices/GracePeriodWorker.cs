@@ -1,45 +1,50 @@
-using EShop.Contracts.IntegrationEvents;
-using EShop.Domain.Repositories;
-using EShop.EventBus;
+using EShop.Application.Orders.Commands;
+using MediatR;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace EShop.Infrastructure.HostServices;
 
-public class GracePeriodWorker(
-    ILogger<GracePeriodWorker> logger,
-    IOrderRepository orderRepository,
-    IEventBus eventBus
-    ) : BackgroundService
+public class GracePeriodWorker : BackgroundService
 {
-    private readonly IOrderRepository _orderRepository = orderRepository;
-    private readonly IEventBus _eventBus = eventBus;
+    private readonly ILogger<GracePeriodWorker> _logger;
+    private readonly IServiceProvider _serviceProvider;
 
+    public GracePeriodWorker(ILogger<GracePeriodWorker> logger, IServiceProvider serviceProvider)
+    {
+        _logger = logger;
+        _serviceProvider = serviceProvider;
+    }
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        //var delayTime = TimeSpan.FromSeconds(_options.CheckUpdateTime);
-
-        logger.LogInformation("GracePeriodWorker is starting.");
-
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            await CheckConfirmedGracePeriodOrders(stoppingToken);
-            await Task.Delay(TimeSpan.FromSeconds(10), stoppingToken);
-        }
-
-        logger.LogInformation("GracePeriodWorker is stopping");
+        _logger.LogInformation("GracePeriodWorker is starting.");
+        await DoWork(stoppingToken);
     }
 
-    private async Task CheckConfirmedGracePeriodOrders(CancellationToken cancellationToken)
+    private async Task DoWork(CancellationToken cancellationToken)
     {
-        var orderIds = await _orderRepository.GetConfirmedGracePeriodOrdersAsync(cancellationToken);
-        foreach (var orderId in orderIds)
+        while (!cancellationToken.IsCancellationRequested)
         {
-            var integrationEvent = new GracePeriodEvent { OrderId = orderId };
+            try
+            {
+                var publishGracePeriodCommand = new PublishGracePeriodCommand();
 
-            logger.LogInformation("Publishing integration event: {IntegrationEventId} - ({@IntegrationEvent})", integrationEvent.OrderId, integrationEvent);
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    var mediator = scope.ServiceProvider.GetRequiredService<IMediator>();
 
-            await _eventBus.SendAsync(integrationEvent, cancellationToken);
+                    await mediator.Send(publishGracePeriodCommand, cancellationToken);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "");
+            }
+
+            await Task.Delay(10000, cancellationToken);
         }
+
+        _logger.LogInformation("GracePeriodWorker is stopping.");
     }
 }

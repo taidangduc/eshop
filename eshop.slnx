@@ -6,8 +6,6 @@
     <Project Path="src/EShop.Bff/EShop.Bff.csproj" />
     <Project Path="src/EShop.Contracts/EShop.Contracts.csproj" />
     <Project Path="src/EShop.Domain/EShop.Domain.csproj" />
-    <Project Path="src/EShop.EventBus.RabbitMQ/EShop.EventBus.RabbitMQ.csproj" />
-    <Project Path="src/EShop.EventBus/EShop.EventBus.csproj" />
     <Project Path="src/EShop.IdentityService/EShop.IdentityService.csproj" />
     <Project Path="src/EShop.Infrastructure/EShop.Infrastructure.csproj" />
     <Project Path="src/EShop.Migrator/EShop.Migrator.csproj" />

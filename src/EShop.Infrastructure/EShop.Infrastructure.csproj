@@ -29,7 +29,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EShop.Application\EShop.Application.csproj" />
-    <ProjectReference Include="..\EShop.EventBus.RabbitMQ\EShop.EventBus.RabbitMQ.csproj" />
     <ProjectReference Include="..\EShop.Persistence\EShop.Persistence.csproj" />
   </ItemGroup>
 
