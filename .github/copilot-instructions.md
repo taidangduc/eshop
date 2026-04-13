@@ -4,18 +4,24 @@
 
 This is a .NET 9 e-commerce application using **Clean Architecture** with CQRS pattern and Domain-Driven Design.
 
-### Layer Structure
-- **Domain** (`src/Domain`): Core entities, value objects, domain events. No external dependencies.
-- **Application** (`src/Application`): Commands/queries with MediatR handlers, interfaces, DTOs, validators
-- **Infrastructure** (`src/Infrastructure`): External integrations (payments, email, storage), EventBus configuration
-- **Persistence** (`src/Persistence`): EF Core DbContext, entity configurations, interceptors, repositories
-- **Outbox.EF** (`src/Outbox.EF`): Outbox pattern implementation with polling service
-- **EventBus** + **EventBus.RabbitMQ** (`src/EventBus*`): Event bus abstraction and RabbitMQ implementation
-- **Api** (`src/Api`): Minimal APIs organized in `Endpoints/` folder (e.g., `CatalogApi.cs`, `OrderApi.cs`)
-- **AppHost** (`src/AppHost`): .NET Aspire orchestration for local development
+### Project Structure
+| Project | Path | Purpose |
+|---------|------|---------|
+| **EShop.Domain** | `src/EShop.Domain` | Core entities, value objects, domain events. No external dependencies. |
+| **EShop.Application** | `src/EShop.Application` | Commands/queries with MediatR handlers, DTOs, validators, behaviors |
+| **EShop.Infrastructure** | `src/EShop.Infrastructure` | Payment, email, storage, background workers |
+| **EShop.Persistence** | `src/EShop.Persistence` | EF Core `EShopDbContext`, entity configurations, interceptors, repositories |
+| **EShop.WebAPI** | `src/EShop.WebAPI` | ASP.NET Controllers-based REST API (`/api/v1/{resource}`) |
+| **EShop.Bff** | `src/EShop.Bff` | Backend-for-Frontend: YARP reverse proxy + OIDC cookie auth |
+| **EShop.Identity** | `src/EShop.Identity` | Identity/authentication service |
+| **EShop.Contracts** | `src/EShop.Contracts` | Shared DTOs and contracts |
+| **EShop.Migrator** | `src/EShop.Migrator` | Database migration runner utility |
+| **EShop.ServiceDefaults** | `src/EShop.ServiceDefaults` | Aspire shared configuration and extensions |
+| **EShop.AppHost** | `src/EShop.AppHost` | .NET Aspire orchestration for local development |
+| **EShop.StoreFront** | `src/EShop.StoreFront` | React + Vite frontend |
 
 ### Dependency Flow
-Dependencies point inward: Api → Application → Domain ← Infrastructure ← Persistence
+Dependencies point inward: WebAPI → Application → Domain ← Infrastructure ← Persistence
 
 ## Key Patterns & Practices
 
@@ -23,57 +29,43 @@ Dependencies point inward: Api → Application → Domain ← Infrastructure ←
 All business logic flows through MediatR requests:
 - **Commands**: `*Command.cs` + `*CommandHandler.cs` (e.g., `CreateOrderCommand`)
 - **Queries**: `*Query.cs` + `*QueryHandler.cs` (e.g., `GetOrderByIdQuery`)
-- **Validators**: `*CommandValidator.cs` using FluentValidation (not queries)
-- Place in feature folders: `Application/{Feature}/{Commands|Queries}/{Name}/`
+- **Validators**: `*CommandValidator.cs` using FluentValidation — **commands only, not queries**
+- Place in feature folders: `EShop.Application/{Feature}/{Commands|Queries}/`
 
 **Pipeline behaviors** (executed in order):
-1. `ActivityBehavior` - Metrics & distributed tracing via OpenTelemetry
+1. `ActivityBehavior` - Distributed tracing via OpenTelemetry
 2. `LoggingBehavior` - Request/response logging
-3. `ValidationBehavior` - FluentValidation (auto-discovered via reflection)
-4. `TxBehavior` - Database transactions ONLY for commands (not queries) with EF retry strategy
+3. `ValidationBehavior` - FluentValidation (auto-discovered via reflection, commands only)
 
 ### 2. Domain-Driven Design
-- **Aggregates** inherit from `Aggregate<T>` (see `Domain/Entities/Order.cs`)
+- **Entities** inherit from `Entity<TKey>` or `AuditableEntity<TKey>` (adds `CreatedAt`, `UpdatedAt`, `Version`)
+- **Aggregate roots** implement `IAggregateRoot` marker interface
 - **Domain Events** track state changes (e.g., `OrderCreatedDomainEvent`)
-  - Raised by calling `aggregate.AddDomainEvent(event)` within aggregate methods
-  - Automatically dispatched by `DispatchDomainEventInterceptor` after SaveChanges
-  - Handled by `INotificationHandler<TDomainEvent>` in `Application/{Feature}/DomainEventHandlers/`
-- **Value Objects** for type safety (e.g., `Money`, `Address` in `Domain/ValueObject/`)
-- Aggregates encapsulate business rules; use factory methods like `Order.Create()`
-- **Interceptors**: 
-  - `AuditableEntityInterceptor` - Auto-sets CreatedDate, UpdatedDate, CreatedBy, UpdatedBy
-  - `DispatchDomainEventInterceptor` - Publishes domain events to MediatR after SaveChanges
+  - Raised by calling `entity.AddDomainEvent(event)` within entity methods
+  - Automatically dispatched by `DispatchDomainEventInterceptor` after `SaveChanges`
+  - Handled by `INotificationHandler<TDomainEvent>` in `EShop.Application/{Feature}/EventHandlers/`
+- **Value Objects** for type safety (e.g., `Money`, `Address` in `EShop.Domain/ValueObject/`)
+- Use factory methods like `Order.Create()`
+- **Interceptors** in `EShop.Persistence/Interceptors/`:
+  - `AuditableEntityInterceptor` — Auto-sets `CreatedAt`, `UpdatedAt`, increments `Version`
+  - `DispatchDomainEventInterceptor` — Publishes domain events to MediatR after `SaveChanges`
 
-**Domain Event → Integration Event Flow**:
-1. Aggregate raises domain event (e.g., `OrderCreatedDomainEvent`)
-2. `DispatchDomainEventInterceptor` publishes to MediatR after SaveChanges
-3. Domain event handler converts to integration event and saves to Outbox table
-4. `TransactionalOutboxPollingService` publishes to EventBus (RabbitMQ) every 5s
-
-### 3. Outbox Pattern for Reliability
-Events aren't published directly—they're saved to `PollingOutboxMessage` table:
-```csharp
-var message = new PollingOutboxMessage {
-    PayloadType = typeof(OrderCreatedIntegrationEvent).FullName,
-    Payload = JsonSerializer.Serialize(integrationEvent),
-    CreateDate = DateTime.UtcNow
-};
-await outboxRepository.AddAsync(message);
-await outboxRepository.SaveChangesAsync();
-```
-`TransactionalOutboxPollingService` background service polls every 5s and publishes to EventBus.
-- Ensures at-least-once delivery and no message loss
-- Retry mechanism with max retry count
-- Separate `OutboxDbContext` for outbox messages (migrated alongside `ApplicationDbContext`)
+### 3. Outbox Pattern (Partial Implementation)
+The outbox pattern is partially implemented:
+- `OutboxMessage` entity stored in the same `EShopDbContext` (not a separate context)
+- `IOutboxMessageRepository` interface defined in domain
+- Domain event handlers save `OutboxMessage` records for reliable delivery
+- **Note**: A background polling/publishing service is not yet present; events are currently processed via MediatR directly
 
 ### 4. Payment Gateway Factory Pattern
-Multiple payment providers (Vnpay, Stripe) implement `IPaymentGateway`:
+Payment providers implement `IPaymentGateway`:
 ```csharp
-var gateway = _factory.Resolve(request.Provider);  // Factory resolves by enum
+var gateway = _factory.Resolve(request.Provider);  // Factory resolves by PaymentProvider enum
 var result = await gateway.CreatePaymentUrl(request);
 ```
-- Add new providers in `Infrastructure/ExternalServices/Payments/`
-- Register in `Infrastructure/DependencyInjection.cs`
+- **Currently implemented**: `StripePaymentGateway`
+- **Defined in enum but not implemented**: `Vnpay`
+- Add new providers in `EShop.Infrastructure/Payment/`
 - Update `PaymentGatewayFactory.Resolve()` switch statement
 
 ### 5. Observability
@@ -84,6 +76,17 @@ Commands/queries automatically tracked with:
 - Registered in `ApplicationServiceExtensions.cs` as singletons
 - Default Aspire observability includes distributed tracing, logs aggregation, and metrics dashboards
 
+### 6. Background Workers
+Located in `EShop.Infrastructure/HostServices/`:
+- `GracePeriodWorker` — Handles order grace period logic
+- `SendEmailWorker` — Processes email notifications
+
+### 7. BFF (Backend-for-Frontend)
+`EShop.Bff` acts as a secure gateway for the React frontend:
+- YARP reverse proxy routes requests to WebAPI
+- OIDC cookie-based authentication (redirects to Identity service)
+- Automatically adds Bearer token to proxied requests
+
 ## Development Workflows
 
 ### Build & Run
@@ -91,96 +94,105 @@ Commands/queries automatically tracked with:
 # Build entire solution
 dotnet build
 
-# Run API only (port 6005)
-dotnet run --project src/Api/Api.csproj
+# Run WebAPI only
+dotnet run --project src/EShop.WebAPI/EShop.WebAPI.csproj
 
-# Run with Aspire (recommended - orchestrates all services)
+# Run with Aspire (recommended — orchestrates all services)
 aspire run --project ./eshop.sln
 
-# Docker Compose (full stack with postgres, rabbitmq, nginx)
-docker-compose -f infra/docker-compose/docker-compose.dev.yml up --build
+# Individual service infrastructure (PostgreSQL, RabbitMQ)
+docker compose -f tools/postgresql/docker-compose.yml up -d
+docker compose -f tools/rabbitmq/docker-compose.yml up -d
 ```
 
 ### Aspire Development
-Aspire orchestrates the entire stack locally:
-- **AppHost** (`src/AppHost/Program.cs`) defines service dependencies
-- Services: API, IdentityService, Postgres, RabbitMQ, React frontend (Vite)
+Aspire orchestrates the full stack locally:
+- **AppHost** (`src/EShop.AppHost/Program.cs`) defines all service dependencies
+- Services orchestrated: WebAPI, Identity, BFF, React frontend (Vite, port 3000)
 - Auto-configured connections and service discovery
-- Built-in dashboard for monitoring services at `http://localhost:15888`
+- Built-in dashboard for monitoring at `http://localhost:15888`
 
 ### Testing
 ```powershell
-dotnet test tests/UnitTests/UnitTests.csproj
-dotnet test tests/IntegrationTests/IntegrationTests.csproj
+dotnet test tests/EShop.UnitTests/EShop.UnitTests.csproj
+dotnet test tests/EShop.IntegrationTests/EShop.IntegrationTests.csproj
 ```
-- **Unit tests**: Use xUnit + Moq for mocking
-- **Integration tests**: Use `Aspire.Hosting.Testing` for full stack testing
+- **Unit tests**: xUnit + Moq for mocking
+- **Integration tests**: `Aspire.Hosting.Testing` for full stack testing
 
 ### Database Migrations
-Migrations run automatically on startup via `MigrateAndSeedDataAsync()` in `Program.cs`.
-Both `ApplicationDbContext` and `OutboxDbContext` are migrated.
+Managed via `EShop.Migrator` project and `EShop.Persistence`:
+- Single `EShopDbContext` (implements `IUnitOfWork`) for all tables including `OutboxMessage`
+- Migrations run on startup via the migrator
 
 To create new migrations:
 ```powershell
-dotnet ef migrations add MigrationName -p src/Persistence
+dotnet ef migrations add MigrationName -p src/EShop.Persistence
 ```
 
 ## Common Tasks
 
 ### Adding New Command/Query
-1. Create folder: `Application/{Feature}/{Commands|Queries}/{Name}/`
+1. Create in `EShop.Application/{Feature}/Commands/` or `EShop.Application/{Feature}/Queries/`
 2. Define request: `public record MyCommand(...) : IRequest<MyResult>;`
 3. Create handler: `public class MyCommandHandler : IRequestHandler<MyCommand, MyResult>`
-4. (Optional) Add validator: `public class MyCommandValidator : AbstractValidator<MyCommand>`
-   - Validators only for commands, not queries
+4. (Optional) Add validator co-located with the command:
+   ```csharp
+   public class MyCommandValidator : AbstractValidator<MyCommand> { ... }
+   ```
+   - Validators **only for commands**, never for queries
    - Auto-discovered by FluentValidation via reflection
-   - Run in `ValidationBehavior` pipeline before handler execution
+   - Executed in `ValidationBehavior` pipeline before handler
 
 ### Adding New Entity
-1. Create in `Domain/Entities/`, inherit `Aggregate<TId>` or `Entity<TId>`
-2. Add `DbSet<Entity>` to `ApplicationDbContext` in `Persistence/`
-3. Create configuration in `Persistence/Configurations/` implementing `IEntityTypeConfiguration<T>`
-4. Generate migration: `dotnet ef migrations add AddEntity -p src/Persistence`
+1. Create in `EShop.Domain/Entities/`, inherit `Entity<TKey>` or `AuditableEntity<TKey>`
+2. Implement `IAggregateRoot` if it's an aggregate root
+3. Add `DbSet<Entity>` to `EShopDbContext` in `EShop.Persistence/`
+4. Create configuration in `EShop.Persistence/DbConfigurations/` implementing `IEntityTypeConfiguration<T>`
+5. Generate migration: `dotnet ef migrations add AddEntity -p src/EShop.Persistence`
 
-### Adding Minimal API Endpoint
-Add methods to existing `*Api.cs` files in `src/Api/Endpoints/`:
+### Adding a New API Controller
+Add a controller to `src/EShop.WebAPI/Controllers/`:
 ```csharp
-group.MapPost("/", async (ISender sender, MyCommand cmd) => 
-    await sender.Send(cmd))
-    .RequireAuthorization()
-    .WithName("CreateItem")
-    .Produces<MyResult>(StatusCodes.Status200OK)
-    .ProducesProblem(StatusCodes.Status400BadRequest);
-```
-Map in `Program.cs`: `app.MapMyApi();`
+[ApiController]
+[Route("api/v1/[controller]")]
+[Authorize]
+public class MyResourceController : ControllerBase
+{
+    private readonly ISender _sender;
+    public MyResourceController(ISender sender) => _sender = sender;
 
-### Integration Events
-For cross-boundary communication:
-1. Define event in `Contracts/IntegrationEvents/`
-2. Create handler in `Application/{Feature}/IntegrationEventHandlers/`
-3. Register subscription in `Infrastructure/DependencyInjection.cs`:
-   ```csharp
-   .AddSubscription<MyEvent, MyEventHandler>()
-   ```
+    [HttpPost]
+    [ProducesResponseType(typeof(MyResult), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> Create([FromBody] MyCommand cmd)
+        => Ok(await _sender.Send(cmd));
+}
+```
+
+### Domain Events
+1. Define event record in `EShop.Domain/Events/` implementing `IDomainEvent`
+2. Raise it inside the entity: `AddDomainEvent(new MyDomainEvent(...))`
+3. Handle in `EShop.Application/{Feature}/EventHandlers/` with `INotificationHandler<MyDomainEvent>`
 
 ## Configuration
 
-- **Development**: `src/Api/appsettings.Development.json`
-- **Docker**: `src/Api/appsettings.Docker.json`
-- Connection strings use Aspire format: `builder.AddNpgsqlDbContext<AppDbContext>("shopdb")`
-- Payment configs in `VnpayConf`/`StripeConf` sections
-- Test environment uses `NullEventPublisher` to skip RabbitMQ during testing
+- **Development**: `src/EShop.WebAPI/appsettings.Development.json`
+- Connection strings use Aspire format via `builder.AddNpgsqlDbContext<EShopDbContext>(...)`
+- Payment config in `StripeConf` section (appsettings)
+- `EShop.ServiceDefaults` provides shared Aspire configuration (telemetry, health checks)
 
 ## Important Conventions
 
 - **Naming**: Commands end with `Command`, queries with `Query`, handlers with `Handler`, validators with `Validator`
-- **Transaction scope**: Only commands wrapped in transactions (queries are read-only)
+- **Transactions**: Handled manually via `repository.UnitOfWork.SaveChangesAsync()` — no TxBehavior pipeline
 - **Async all the way**: Use `async/await` consistently
-- **Dependency Injection**: Register services via extension methods in `*DependencyInjection.cs` or `Extensions.cs`
+- **Dependency Injection**: Register services via extension methods in `*Extensions.cs` or `*ServiceExtensions.cs`
 - **Validation**: Use FluentValidation, not data annotations
-- **Event sourcing**: Domain events for internal state changes, integration events for external communication
-- **Feature folders**: Group by feature (Order, Catalog, etc.) not by layer (Commands, Queries)
+- **Domain events**: For internal state changes only; no external EventBus currently
+- **Feature folders**: Group by feature (Orders, Products, Customers, etc.) not by layer
+- **Namespaces**: Match project name prefix — e.g., `EShop.Application.Orders.Commands`
 
 ## Frontend
 
-React + Vite app in `src/EShop.StoreFront/` communicates with backend via HTTP APIs.
+React + Vite app in `src/EShop.StoreFront/` communicates with the backend via `EShop.Bff` (which proxies to `EShop.WebAPI`).
