@@ -4,13 +4,13 @@
 
 var builder = DistributedApplication.CreateBuilder(args);
 
-var apiService = builder.AddProject<Projects.EShop_Api>("apiservice");
+var apiService = builder.AddProject<Projects.EShop_WebAPI>("webapi");
 
-var identityService = builder.AddProject<Projects.EShop_IdentityService>("identityservice")
+var identityService = builder.AddProject<Projects.EShop_Identity>("identity")
     .WaitFor(apiService);
 
 // test / dev local frontend with react and vite
-var reactVite = builder.AddViteApp("webfrontend", "../EShop.StoreFront")
+var reactVite = builder.AddViteApp("storefront", "../EShop.StoreFront")
     .WithReference(apiService)
     .WaitFor(apiService)
     .WithEndpoint("http", e => e.Port = 3000) // fixed port for frontend

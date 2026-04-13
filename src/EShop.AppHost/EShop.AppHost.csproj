@@ -20,9 +20,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EShop.Api\EShop.Api.csproj" />
+    <ProjectReference Include="..\EShop.WebAPI\EShop.WebAPI.csproj" />
     <ProjectReference Include="..\EShop.Bff\EShop.Bff.csproj" />
-    <ProjectReference Include="..\EShop.IdentityService\EShop.IdentityService.csproj" />
+    <ProjectReference Include="..\EShop.Identity\EShop.Identity.csproj" />
   </ItemGroup>
 
 </Project>
