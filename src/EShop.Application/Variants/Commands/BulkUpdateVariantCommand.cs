@@ -37,7 +37,7 @@ internal class UpdateVariantsCommandHandler : IRequestHandler<BulkUpdateVariantC
                 item.Price = request.Price.Value;
             }
 
-            if (request.Quantity.HasValue && item.Quantity != request.Quantity.Value && item.Quantity != 0)
+            if (request.Quantity.HasValue && item.Quantity != request.Quantity.Value && request.Quantity > 0)
             {
                 item.Quantity = request.Quantity.Value;
             }

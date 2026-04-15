@@ -30,11 +30,12 @@ internal class CreateProductOptionValueCommandHandler : IRequestHandler<CreatePr
     public async Task<bool> Handle(CreateProductOptionValueCommand request, CancellationToken cancellationToken)
     {
         var query = _productRepository.GetQueryableSet()
+            .AsQueryable()
             .Include(p => p.Options)
                 .ThenInclude(o => o.Values)
             .Where(p => p.Id == request.ProductId);
 
-        var product = await _productRepository.FirstOrDefaultAsync(query);
+        var product = await query.FirstOrDefaultAsync(cancellationToken);
 
         if (product is null)
         {

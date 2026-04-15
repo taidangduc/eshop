@@ -16,9 +16,9 @@ public class CatalogDataSeeder : IDataSeeder<EShopDbContext>
     {
         await SeedCategories();
         await SeedProducts();
-        await SeedProductOptions();
-        //await SeedProductOptionValues();
-        await SeedProductImages();
+        // await SeedProductOptions();
+        // await SeedProductOptionValues();
+        // await SeedProductImages();
         // await SeedVariants();
         // await SeedVariantOptions();
     }
