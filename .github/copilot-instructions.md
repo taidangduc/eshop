@@ -50,14 +50,7 @@ All business logic flows through MediatR requests:
   - `AuditableEntityInterceptor` — Auto-sets `CreatedAt`, `UpdatedAt`, increments `Version`
   - `DispatchDomainEventInterceptor` — Publishes domain events to MediatR after `SaveChanges`
 
-### 3. Outbox Pattern (Partial Implementation)
-The outbox pattern is partially implemented:
-- `OutboxMessage` entity stored in the same `EShopDbContext` (not a separate context)
-- `IOutboxMessageRepository` interface defined in domain
-- Domain event handlers save `OutboxMessage` records for reliable delivery
-- **Note**: A background polling/publishing service is not yet present; events are currently processed via MediatR directly
-
-### 4. Payment Gateway Factory Pattern
+### 3. Payment Gateway Factory Pattern
 Payment providers implement `IPaymentGateway`:
 ```csharp
 var gateway = _factory.Resolve(request.Provider);  // Factory resolves by PaymentProvider enum
@@ -68,7 +61,7 @@ var result = await gateway.CreatePaymentUrl(request);
 - Add new providers in `EShop.Infrastructure/Payment/`
 - Update `PaymentGatewayFactory.Resolve()` switch statement
 
-### 5. Observability
+### 4. Observability
 Commands/queries automatically tracked with:
 - **Metrics**: `CommandHandlerMetrics`/`QueryHandlerMetrics` (counters, histograms)
 - **Tracing**: `CommandHandlerActivity`/`QueryHandlerActivity` (OpenTelemetry spans)
@@ -76,12 +69,12 @@ Commands/queries automatically tracked with:
 - Registered in `ApplicationServiceExtensions.cs` as singletons
 - Default Aspire observability includes distributed tracing, logs aggregation, and metrics dashboards
 
-### 6. Background Workers
+### 5. Background Workers
 Located in `EShop.Infrastructure/HostServices/`:
 - `GracePeriodWorker` — Handles order grace period logic
 - `SendEmailWorker` — Processes email notifications
 
-### 7. BFF (Backend-for-Frontend)
+### 6. BFF (Backend-for-Frontend)
 `EShop.Bff` acts as a secure gateway for the React frontend:
 - YARP reverse proxy routes requests to WebAPI
 - OIDC cookie-based authentication (redirects to Identity service)
@@ -122,7 +115,7 @@ dotnet test tests/EShop.IntegrationTests/EShop.IntegrationTests.csproj
 
 ### Database Migrations
 Managed via `EShop.Migrator` project and `EShop.Persistence`:
-- Single `EShopDbContext` (implements `IUnitOfWork`) for all tables including `OutboxMessage`
+- Single `EShopDbContext` (implements `IUnitOfWork`) for all tables
 - Migrations run on startup via the migrator
 
 To create new migrations:
@@ -189,7 +182,7 @@ public class MyResourceController : ControllerBase
 - **Async all the way**: Use `async/await` consistently
 - **Dependency Injection**: Register services via extension methods in `*Extensions.cs` or `*ServiceExtensions.cs`
 - **Validation**: Use FluentValidation, not data annotations
-- **Domain events**: For internal state changes only; no external EventBus currently
+- **Domain events**: For internal state changes only; no EventBus or Outbox pattern is used — domain events are dispatched in-process via MediatR
 - **Feature folders**: Group by feature (Orders, Products, Customers, etc.) not by layer
 - **Namespaces**: Match project name prefix — e.g., `EShop.Application.Orders.Commands`
 
