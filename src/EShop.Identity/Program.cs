@@ -43,3 +43,5 @@ app.MapControllerRoute(
 await app.MigrationDbContextAsync<IdentityDbContext>();
 
 app.Run();
+
+public partial class Program { }
