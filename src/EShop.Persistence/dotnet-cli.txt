@@ -1,3 +1,5 @@
-﻿dotnet ef migrations add Initial_ShopDb --context EShopDbContext --project EShop.Persistence --startup-project EShop.Api --output-dir Migrations
+﻿dotnet ef migrations add Initial_ShopDb --context EShopDbContext --project EShop.Persistence --startup-project EShop.WebAPI --output-dir Migrations
 
-dotnet ef database update --context EShopDbContext --project EShop.Persistence --startup-project EShop.Api
+dotnet ef database update --context EShopDbContext --project EShop.Persistence --startup-project EShop.WebAPI
+
+dotnet ef migrations add Latest_ShopDb --context EShopDbContext --project EShop.Persistence --startup-project EShop.WebAPI --output-dir Migrations
