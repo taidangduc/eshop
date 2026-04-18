@@ -6,7 +6,7 @@ var builder = DistributedApplication.CreateBuilder(args);
 
 var apiService = builder.AddProject<Projects.EShop_WebAPI>("webapi");
 
-var identityService = builder.AddProject<Projects.EShop_Identity>("identity")
+var identityService = builder.AddProject<Projects.EShop_IdentityServer>("identityserver")
     .WaitFor(apiService);
 
 // test / dev local frontend with react and vite

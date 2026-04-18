@@ -6,7 +6,7 @@
     <Project Path="src/EShop.Bff/EShop.Bff.csproj" />
     <Project Path="src/EShop.Contracts/EShop.Contracts.csproj" />
     <Project Path="src/EShop.Domain/EShop.Domain.csproj" />
-    <Project Path="src/EShop.Identity/EShop.Identity.csproj" />
+    <Project Path="src/EShop.IdentityServer/EShop.IdentityServer.csproj" />
     <Project Path="src/EShop.Infrastructure/EShop.Infrastructure.csproj" />
     <Project Path="src/EShop.Migrator/EShop.Migrator.csproj" />
     <Project Path="src/EShop.Persistence/EShop.Persistence.csproj" />
