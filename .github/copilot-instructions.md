@@ -57,7 +57,6 @@ var gateway = _factory.Resolve(request.Provider);  // Factory resolves by Paymen
 var result = await gateway.CreatePaymentUrl(request);
 ```
 - **Currently implemented**: `StripePaymentGateway`
-- **Defined in enum but not implemented**: `Vnpay`
 - Add new providers in `EShop.Infrastructure/Payment/`
 - Update `PaymentGatewayFactory.Resolve()` switch statement
 
@@ -93,9 +92,8 @@ dotnet run --project src/EShop.WebAPI/EShop.WebAPI.csproj
 # Run with Aspire (recommended — orchestrates all services)
 aspire run --project ./eshop.sln
 
-# Individual service infrastructure (PostgreSQL, RabbitMQ)
+# Individual service infrastructure (PostgreSQL)
 docker compose -f tools/postgresql/docker-compose.yml up -d
-docker compose -f tools/rabbitmq/docker-compose.yml up -d
 ```
 
 ### Aspire Development

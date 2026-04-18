@@ -1,6 +1,5 @@
 export const PAYMENT_PROVIDERS = [
   { id: "cod", label: "Cash on Delivery", method: 1, provider: 0 },
-  { id: "vnpay", label: "VnPay", method: 2, provider: 1 },
   { id: "stripe", label: "Stripe", method: 2, provider: 2 },
 ];
 
