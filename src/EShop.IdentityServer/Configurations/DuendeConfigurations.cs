@@ -1,6 +1,6 @@
 using Duende.IdentityServer;
 using Duende.IdentityServer.Models;
-using EShop.IdentityService.Constants;
+using EShop.IdentityService.Authorization;
 
 namespace EShop.IdentityService.Configurations;
 
@@ -14,9 +14,9 @@ public static class DuendeConfigurations
     ];
 
     public static IEnumerable<ApiScope> ApiScopes => [
-        new ApiScope(Permission.Read, "Read Access to API"),
-        new ApiScope(Permission.Write, "Write Access to API"),
-        new ApiScope(Permission.All, "Write and Read Access to API")
+        new ApiScope(Permissions.Read, "Read Access to API"),
+        new ApiScope(Permissions.Write, "Write Access to API"),
+        new ApiScope(Permissions.All, "Write and Read Access to API")
     ];
 
     public static IEnumerable<ApiResource> ApiResources => [
@@ -24,7 +24,7 @@ public static class DuendeConfigurations
         {
             Name = "api.eshop",
             DisplayName = "Eshop API",
-            Scopes = {Permission.Read, Permission.Write},
+            Scopes = {Permissions.Read, Permissions.Write},
         }
     ];
 
@@ -37,7 +37,7 @@ public static class DuendeConfigurations
             ClientName = "Resource Owner Client",
             ClientSecrets = {new Secret("secret".Sha256())},
             AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
-            AllowedScopes = { Permission.Read, Permission.Write},
+            AllowedScopes = { Permissions.Read, Permissions.Write},
         },
         // Backend For Frontend
         new()
@@ -49,15 +49,15 @@ public static class DuendeConfigurations
             AllowedScopes = {
                 IdentityServerConstants.StandardScopes.OpenId,
                 IdentityServerConstants.StandardScopes.Profile,
-                Permission.Read,
-                Permission.Write,
+                Permissions.Read,
+                Permissions.Write,
             },
             AllowOfflineAccess = true,
             AllowedCorsOrigins = { "https://localhost:5002"},
-            AlwaysIncludeUserClaimsInIdToken = true,          
+            AlwaysIncludeUserClaimsInIdToken = true,
             RedirectUris = { "https://localhost:5002/signin-oidc" },
             PostLogoutRedirectUris = { "https://localhost:5002/signout-callback-oidc"},
             FrontChannelLogoutUri = "https://localhost:5002/signout-oidc"
-        },     
+        },
     ];
 }

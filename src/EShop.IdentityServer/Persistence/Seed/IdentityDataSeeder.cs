@@ -2,7 +2,6 @@ using EShop.IdentityService.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using EShop.Migrator;
-using EShop.Infrastructure.Identity;
 using EShop.Contracts.Customer.Services;
 using EShop.Contracts.Customer.DTOs;
 

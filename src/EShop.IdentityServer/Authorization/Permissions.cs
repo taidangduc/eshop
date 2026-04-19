@@ -1,6 +1,6 @@
-namespace EShop.IdentityService.Constants;
+namespace EShop.IdentityService.Authorization;
 
-public static class Permission
+public static class Permissions
 {
     public static string Write => nameof(Write);
     public static string Read => nameof(Read);

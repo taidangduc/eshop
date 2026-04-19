@@ -31,7 +31,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EShop.Contracts\EShop.Contracts.csproj" />
-    <ProjectReference Include="..\EShop.Infrastructure\EShop.Infrastructure.csproj" />
     <ProjectReference Include="..\EShop.Migrator\EShop.Migrator.csproj" />
     <ProjectReference Include="..\EShop.ServiceDefaults\EShop.ServiceDefaults.csproj" />
   </ItemGroup>
