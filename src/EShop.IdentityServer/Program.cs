@@ -1,6 +1,6 @@
 using EShop.IdentityService.ConfigurationOptions;
 using EShop.IdentityService.Extensions;
-using EShop.IdentityService.Persistence;
+using EShop.IdentityService.Data;
 using EShop.Migrator;
 
 var builder = WebApplication.CreateBuilder(args);

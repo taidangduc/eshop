@@ -2,11 +2,11 @@ using Duende.IdentityServer;
 using EShop.IdentityService.ConfigurationOptions;
 using EShop.IdentityService.ConfigurationOptions.ExternalLogin;
 using EShop.IdentityService.Configurations;
-using EShop.IdentityService.Entities;
+using EShop.IdentityService.Data.Entities;
 using Microsoft.AspNetCore.Identity;
-using EShop.IdentityService.Persistence;
+using EShop.IdentityService.Data;
 using EShop.Migrator;
-using EShop.IdentityService.Persistence.Seed;
+using EShop.IdentityService.Data.Seed;
 using EShop.Contracts.Customer.Services;
 using EShop.IdentityService.Services;
 

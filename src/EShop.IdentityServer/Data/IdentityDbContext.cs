@@ -1,7 +1,7 @@
-using EShop.IdentityService.Entities;
+using EShop.IdentityService.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 
-namespace EShop.IdentityService.Persistence;
+namespace EShop.IdentityService.Data;
 
 public class IdentityDbContext : Microsoft.AspNetCore.Identity.EntityFrameworkCore.IdentityDbContext
     <User, Role, Guid, UserClaim, UserRole, UserLogin, RoleClaim, UserToken>

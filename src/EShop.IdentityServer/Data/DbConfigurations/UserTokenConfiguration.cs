@@ -1,8 +1,8 @@
-using EShop.IdentityService.Entities;
+using EShop.IdentityService.Data.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace EShop.IdentityService.Persistence;
+namespace EShop.IdentityService.Data;
 
 public class UserTokenConfiguration : IEntityTypeConfiguration<UserToken>
 {

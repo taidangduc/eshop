@@ -1,4 +1,3 @@
-using EShop.IdentityService.Entities;
 using EShop.IdentityService.Models.Account;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -6,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Duende.IdentityServer.Services;
 using EShop.Contracts.Customer.Services;
 using EShop.Contracts.Customer.DTOs;
+using EShop.IdentityService.Data.Entities;
 
 namespace EShop.IdentityService.Controllers;
 

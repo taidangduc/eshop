@@ -1,11 +1,11 @@
-using EShop.IdentityService.Entities;
+using EShop.IdentityService.Data.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using EShop.Migrator;
 using EShop.Contracts.Customer.Services;
 using EShop.Contracts.Customer.DTOs;
 
-namespace EShop.IdentityService.Persistence.Seed;
+namespace EShop.IdentityService.Data.Seed;
 
 public class IdentityDataSeeder : IDataSeeder<IdentityDbContext>
 {

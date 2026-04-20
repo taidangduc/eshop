@@ -1,6 +1,6 @@
-using EShop.IdentityService.Entities;
+using EShop.IdentityService.Data.Entities;
 
-namespace EShop.IdentityService.Persistence.Seed;
+namespace EShop.IdentityService.Data.Seed;
 
 public static class IdentityData
 {
