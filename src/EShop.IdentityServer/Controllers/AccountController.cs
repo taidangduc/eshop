@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Duende.IdentityServer.Services;
 using EShop.Contracts.Customer.Services;
 using EShop.Contracts.Customer.DTOs;
-using EShop.IdentityService.Data.Entities;
+using EShop.IdentityService.Entities;
 
 namespace EShop.IdentityService.Controllers;
 
@@ -32,7 +32,7 @@ public class AccountController : Controller
     [AllowAnonymous]
     public IActionResult Login(string returnUrl = null)
     {
-        if (User.Identity.IsAuthenticated)
+        if (User.Identity.IsAuthenticated == true)
         {
             return RedirectToLocal(returnUrl);
         }
@@ -42,6 +42,17 @@ public class AccountController : Controller
         return View();
     }
 
+    // Flow: FE -> BFF -> IdentityServer -> BFF -> FE
+    // 1. FE sends login request to BFF with user credentials and returnUrl
+    // 2. BFF forwards the login request to IdentityServer
+    // 3. IdentityServer validates the user credentials and issues authentication cookie
+    // 4. IdentityServer redirects back to BFF with returnUrl
+    // 5. BFF redirects back to FE with returnUrl
+    // 6. FE redirects to returnUrl
+    // Note: 
+    // returnUrl is the URL that the user originally requested before being redirected to login page. auto bind 
+    // It is used to redirect the user back to the original URL after successful login.
+    // If returnUrl is not provided, the user will be redirected to home page in IdentityServer after successful login.
     [HttpPost]
     [AllowAnonymous]
     public async Task<IActionResult> Login(LoginModel model)
@@ -50,14 +61,16 @@ public class AccountController : Controller
 
         if (!ModelState.IsValid)
         {
-            return View(model);
+            TempData["Error"] = "Invalid username or password.";
+            return RedirectToAction("Login", new { returnUrl = model.ReturnUrl });
         }
 
         var user = await _userManager.FindByNameAsync(model.UserName);
 
         if (user == null)
         {
-            return View(model);
+            TempData["Error"] = "Invalid username or password.";
+            return RedirectToAction("Login", new { returnUrl = model.ReturnUrl });
         }
 
         var result = await _signInManager.PasswordSignInAsync(model.UserName, model.Password, isPersistent: false, lockoutOnFailure: false);
@@ -66,39 +79,66 @@ public class AccountController : Controller
         {
             if (string.IsNullOrEmpty(model.ReturnUrl))
             {
-                return Redirect("http://localhost:3000/");
+                // If returnUrl is not provided, redirect to home page
+                return RedirectToAction(nameof(HomeController.Index), "Home");
             }
             return RedirectToLocal(model.ReturnUrl);
         }
-
-        return View(model);
+        TempData["Error"] = "Invalid username or password.";
+        return RedirectToAction("Login", new { returnUrl = model.ReturnUrl });
     }
-
+    
+    // Flow:
+    // # Logout at IdenityServer (directly): 
+    // User 
+    // -> IdentityServer 
+    // -> Logout 
+    // -> Confirm Logout 
+    // -> IdentityServer clears SSO session
+    // -> Redirect IdentityServer Home Page
+    // # Logout via BFF (silent logut):
+    // User 
+    // -> FE 
+    // -> BFF clear local session 
+    // -> IdentityServer logout 
+    // -> Redirect Logout UI (silent) 
+    // -> IdentityServer clears SSO session 
+    // -> Redirect PostLogoutRedirectUri to BFF 
+    // -> BFF redirects to FE Home Page
     [HttpGet]
     public async Task<IActionResult> Logout(string? logoutId)
     {
-        var logout = await _interaction.GetLogoutContextAsync(logoutId);
+        var context = await _interaction.GetLogoutContextAsync(logoutId);
 
-        if (User?.Identity?.IsAuthenticated == true)
+        var model = new LogoutModel
         {
-            await _signInManager.SignOutAsync();
-        }
-
-        var postLogoutRedirectUri = logout?.PostLogoutRedirectUri;
-
-        if (string.IsNullOrEmpty(postLogoutRedirectUri))
-        {
-            postLogoutRedirectUri = "http://localhost:3000/";
-        }
-
-        return Redirect(postLogoutRedirectUri);
+            LogoutId = logoutId,
+            PostLogoutRedirectUri = context?.PostLogoutRedirectUri,
+            ShowLogoutPrompt = context?.ShowSignoutPrompt ?? User.Identity?.IsAuthenticated == true,
+        };
+        Console.WriteLine($"IsAuthenticated: {User.Identity?.IsAuthenticated}");
+        Console.WriteLine($"ShowSignoutPrompt: {context?.ShowSignoutPrompt}");
+        return View(model);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Logout(LogoutModel model)
     {
-        return await Logout(model.LogoutId);
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            await _signInManager.SignOutAsync();
+        }
+
+        var context = await _interaction.GetLogoutContextAsync(model.LogoutId);
+        var returnUrl = context?.PostLogoutRedirectUri;
+
+        if (string.IsNullOrEmpty(returnUrl))
+        {
+            returnUrl = Url.Action("Index", "Home");
+        }
+
+        return Redirect(returnUrl);
     }
 
     [HttpGet]
@@ -112,14 +152,16 @@ public class AccountController : Controller
     {
         if (!ModelState.IsValid)
         {
-            return View();
+            TempData["Error"] = "Invalid input.";
+            return RedirectToAction("Register");
         }
 
         var user = await _userManager.FindByNameAsync(model.UserName);
 
         if (user != null)
         {
-            return View();
+            TempData["Error"] = "Invalid input.";
+            return RedirectToAction("Register");
         }
 
         user = new User
@@ -132,12 +174,12 @@ public class AccountController : Controller
 
         if (!result.Succeeded)
         {
-            foreach (var error in result.Errors)
-            {
-                ModelState.AddModelError(string.Empty, error.Description);
-            }
-
-            return View();
+            //foreach (var error in result.Errors)
+            //{
+            //    ModelState.AddModelError(string.Empty, error.Description);
+            //}
+            TempData["Error"] = "Invalid input.";
+            return RedirectToAction("Register");
         }
 
         try
@@ -153,9 +195,10 @@ public class AccountController : Controller
         catch
         {
             await _userManager.DeleteAsync(user);
-            return View("Error");
+            TempData["Error"] = "Occur error when create account !";
+            return RedirectToAction("Register");
         }
-
+        
         return View("Login");
     }
 

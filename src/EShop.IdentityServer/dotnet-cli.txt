@@ -1,1 +1,7 @@
-﻿dotnet ef migrations add Initial_Identity --project EShop.IdentityService --output-dir Persistence/Migrations
+﻿dotnet ef migrations add Initial_Identity --project EShop.IdentityServer --output-dir Migrations
+
+// if exist project same name, you can use:
+- must be at the project root
+- call directly project *.csproj, example:
+
+dotnet ef migrations add Initial_Identity --project EShop.IdentityServer.csproj --output-dir Migrations
