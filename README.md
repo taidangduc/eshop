@@ -47,3 +47,8 @@ Provide a sample production-ready foundation for an online store with clean arch
 - ✔️ `Docker`, `Nginx` – containerized dev/production setups and reverse proxy.
 - ✔️ `Aspire` – local orchestration for multi-service development.
 - ✔️ `Microsoft.Extensions.Caching.Memory` – in-memory caching support.
+
+## Demo
+
+#### Identity Server
+<img src="./docs/imgs/identity-server-demo.gif">
