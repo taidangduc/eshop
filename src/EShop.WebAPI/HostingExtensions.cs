@@ -53,7 +53,7 @@ public static class HostingExtensions
     {
         app.UseForwardedHeaders();
 
-        app.UseStaticFiles();
+        //app.UseStaticFiles();
 
         app.UseCors("AllowedOrigins");
 

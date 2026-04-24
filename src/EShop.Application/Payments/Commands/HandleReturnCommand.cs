@@ -18,19 +18,14 @@ internal class HandleReturnCommandHandler : IRequestHandler<HandleReturnCommand,
         _factory = factory;
     }
 
-    // In payment, HandleReturn is mean handle the return url after user complete payment in third party payment page,
-    // we will get the payment result from third party payment provider, then update order status in our system, 
-    // and return the payment result to frontend, frontend will show the payment result to user
-    // *DON'T update order status to completed in this handler,
-    // we will update order status in a separate handler which handle the webhook event from third party payment provider,
-    // because "webhook is more reliable than return url and it's [source of truth]"
-    // *Note: the return url is different from webhook url, 
-    // return url is for redirecting user after payment, 
-    // webhook url is for receiving payment result from third party payment provider
+    // NOTE: 
+    // This isn't [SOURCE OF TRUTH], so you should not update order status in this handler,
+    // Update order status (business logic) should be process via webhook,
     public Task<PaymentResultResponse> Handle(HandleReturnCommand request, CancellationToken cancellationToken)
     {
         var gateway = _factory.Resolve(request.provider);
         var response = gateway.HandleReturnAsync(request.parameters);
+        // TODO
 
         return response;
     }

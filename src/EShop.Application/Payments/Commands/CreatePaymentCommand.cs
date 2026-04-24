@@ -21,10 +21,12 @@ internal class CreatePaymentCommandHandler : IRequestHandler<CreatePaymentComman
         _factory = factory;
         _orderService = orderService;
     }
-
-    // Create payment url for the order,
-    // return the url to frontend, 
-    // then frontend will redirect user to the url to complete payment
+    // NOTE: 
+    // You should create payment url while in transaction of creating order, 
+    // and if payment failed, you can cancel the order, this is more atomic and also can avoid creating payment url for non exist order.
+    // OPTIONAL: 
+    // I create payment url in a separate command handler just for demo purpose, 
+    // to show how to create payment url without coupling with order creation.
     public async Task<CreatePaymentResponse> Handle(CreatePaymentCommand request, CancellationToken cancellationToken)
     {
         var order = await _orderService.GetOrderSummaryAsync(request.OrderId, cancellationToken);

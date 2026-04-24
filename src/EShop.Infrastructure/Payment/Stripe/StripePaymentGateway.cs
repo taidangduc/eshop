@@ -7,6 +7,7 @@ namespace EShop.Infrastructure.Payment.Stripe;
 public class StripePaymentGateway : IPaymentGateway
 {
     private readonly StripeOptions _options;
+
     public StripePaymentGateway(StripeOptions options)
     {
         _options = options;
@@ -70,23 +71,21 @@ public class StripePaymentGateway : IPaymentGateway
         return Task.FromResult(new PaymentResultResponse());
     }
 
-    public async Task<PaymentResultResponse> HandleWebhookAsync(IDictionary<string, string> parameters)
+    public async Task<PaymentResultResponse> HandleWebhookAsync(string body, IDictionary<string, string> headers)
     {
-        if (!parameters.ContainsKey("payload") || !parameters.ContainsKey("sig_header"))
+        // Verify Signature
+        if (!headers.TryGetValue("Stripe-Signature", out var stripeSignature) || string.IsNullOrEmpty(stripeSignature))
         {
             return new PaymentResultResponse
             {
                 IsSuccess = false,
-                Message = "Missing payload or signature header"
+                Message = "Missing Stripe-Signature header"
             };
         }
 
-        var payload = parameters["payload"];
-        var sigHeader = parameters["sig_header"];
-
         try
         {
-            var stripeEvent = EventUtility.ConstructEvent(payload, sigHeader, _options.WebhookSecret);
+            var stripeEvent = EventUtility.ConstructEvent(body, stripeSignature, _options.WebhookSecret);
 
             if (stripeEvent.Type == "checkout.session.completed")
             {

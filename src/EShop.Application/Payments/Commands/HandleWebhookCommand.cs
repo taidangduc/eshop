@@ -7,7 +7,8 @@ namespace EShop.Application.Payments.Commands;
 
 public record HandleWebhookCommand(
     PaymentProvider provider,
-    IDictionary<string, string> parameters)
+    string body,
+    IDictionary<string, string> headers)
     : IRequest<bool>;
 
 internal class HandleWebhookCommandHandler : IRequestHandler<HandleWebhookCommand, bool>
@@ -21,11 +22,10 @@ internal class HandleWebhookCommandHandler : IRequestHandler<HandleWebhookComman
         _orderRepository = orderRepository;
     }
 
-    // [Source of truth]
     public async Task<bool> Handle(HandleWebhookCommand request, CancellationToken cancellationToken)
     {
         var gateway = _factory.Resolve(request.provider);
-        var response = await gateway.HandleWebhookAsync(request.parameters);
+        var response = await gateway.HandleWebhookAsync(request.body, request.headers);
 
         var order = await _orderRepository.GetByOrderNumber(response.OrderNumber);
 

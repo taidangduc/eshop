@@ -9,7 +9,8 @@ public static class PaymentCollectionExtensions
 {
     public static IServiceCollection AddPayment(this IServiceCollection services, PaymentOptions options)
     {
-        services.AddScoped<IPaymentGateway, StripePaymentGateway>(x => new StripePaymentGateway(options.Stripe));
+        services.AddScoped<StripePaymentGateway>(x => new StripePaymentGateway(options.Stripe));
+
         services.AddScoped<IPaymentGatewayFactory, PaymentGatewayFactory>();
 
         return services;

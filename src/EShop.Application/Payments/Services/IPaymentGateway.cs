@@ -4,7 +4,7 @@ public interface IPaymentGateway
 {
     Task<CreatePaymentResponse> CreatePaymentAsync(CreatePaymentRequest request);
     Task<PaymentResultResponse> HandleReturnAsync(IDictionary<string, string> parameters);
-    Task<PaymentResultResponse> HandleWebhookAsync(IDictionary<string, string> parameters);
+    Task<PaymentResultResponse> HandleWebhookAsync(string body, IDictionary<string, string> headers);
 }
 
 public class CreatePaymentRequest
