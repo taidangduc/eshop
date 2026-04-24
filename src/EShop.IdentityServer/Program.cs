@@ -6,7 +6,6 @@ using EShop.IdentityService.Services;
 using EShop.IdentityService.Entities;
 using Microsoft.AspNetCore.Identity;
 using EShop.IdentityService.Configurations;
-using Duende.IdentityServer;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -70,7 +69,7 @@ if (externalLogin?.Google?.IsEnabled == true)
 {
     authBuilder.AddGoogle("Google", options =>
     {
-        options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+        options.SignInScheme = IdentityConstants.ExternalScheme;
         options.ClientId = externalLogin.Google.ClientId;
         options.ClientSecret = externalLogin.Google.ClientSecret;
     });
@@ -80,7 +79,7 @@ if (externalLogin?.Facebook?.IsEnabled == true)
 {
     authBuilder.AddFacebook("Facebook", options =>
     {
-        options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+        options.SignInScheme = IdentityConstants.ExternalScheme;
         options.AppId = externalLogin.Facebook.AppId;
         options.AppSecret = externalLogin.Facebook.AppSecret;
     });
@@ -114,6 +113,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();

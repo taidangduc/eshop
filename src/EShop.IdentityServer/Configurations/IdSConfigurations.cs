@@ -6,7 +6,7 @@ namespace EShop.IdentityService.Configurations;
 
 public static class IdSConfigurations
 {
-    // Resource - ApiScope - ApiResource - Clients
+    // IdentityResources - ApiScopes - ApiResources - Clients
     public static IEnumerable<IdentityResource> IdentityResources =>
     [
         new IdentityResources.OpenId(),
@@ -23,7 +23,7 @@ public static class IdSConfigurations
         new()
         {
             Name = "api.eshop",
-            DisplayName = "Eshop API",
+            DisplayName = "EShop API",
             Scopes = {Permissions.Read, Permissions.Write},
         }
     ];

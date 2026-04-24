@@ -38,16 +38,16 @@ public static class JwtExtensions
         services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
            .AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
            {
-               options.Audience = "eshop";
+               options.Audience = "api.eshop";
                options.Authority = "https://localhost:5001";
                options.RequireHttpsMetadata = false;
-               options.TokenValidationParameters.ValidateAudience = false;
+               options.TokenValidationParameters.ValidateAudience = true;
            });
 
         services.AddAuthorization(
             options =>
             {
-                //Role-bases
+                //Role-based
                 options.AddPolicy(
                     Authorization.Roles.Admin,
                     x =>

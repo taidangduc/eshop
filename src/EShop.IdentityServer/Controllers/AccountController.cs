@@ -6,6 +6,7 @@ using Duende.IdentityServer.Services;
 using EShop.Contracts.Customer.Services;
 using EShop.Contracts.Customer.DTOs;
 using EShop.IdentityService.Entities;
+using EShop.IdentityService.Authorization;
 
 namespace EShop.IdentityService.Controllers;
 
@@ -43,16 +44,6 @@ public class AccountController : Controller
     }
 
     // Flow: FE -> BFF -> IdentityServer -> BFF -> FE
-    // 1. FE sends login request to BFF with user credentials and returnUrl
-    // 2. BFF forwards the login request to IdentityServer
-    // 3. IdentityServer validates the user credentials and issues authentication cookie
-    // 4. IdentityServer redirects back to BFF with returnUrl
-    // 5. BFF redirects back to FE with returnUrl
-    // 6. FE redirects to returnUrl
-    // Note: 
-    // returnUrl is the URL that the user originally requested before being redirected to login page. auto bind 
-    // It is used to redirect the user back to the original URL after successful login.
-    // If returnUrl is not provided, the user will be redirected to home page in IdentityServer after successful login.
     [HttpPost]
     [AllowAnonymous]
     public async Task<IActionResult> Login(LoginModel model)
@@ -116,8 +107,7 @@ public class AccountController : Controller
             PostLogoutRedirectUri = context?.PostLogoutRedirectUri,
             ShowLogoutPrompt = context?.ShowSignoutPrompt ?? User.Identity?.IsAuthenticated == true,
         };
-        Console.WriteLine($"IsAuthenticated: {User.Identity?.IsAuthenticated}");
-        Console.WriteLine($"ShowSignoutPrompt: {context?.ShowSignoutPrompt}");
+ 
         return View(model);
     }
 
@@ -182,6 +172,9 @@ public class AccountController : Controller
             return RedirectToAction("Register");
         }
 
+        // Assign default role
+        await _userManager.AddToRoleAsync(user, Roles.User);
+
         try
         {
             var customer = new CreateCustomerModel
@@ -190,7 +183,7 @@ public class AccountController : Controller
                 Email = user.Email,
             };
 
-            await _customerService.CreateAsync(customer);
+            await _customerService.CreateAsync(customer); 
         }
         catch
         {
