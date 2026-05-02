@@ -1,4 +1,4 @@
-import { apiClient } from "@/lib/api-client";
+import { apiClient } from "@lib/api-client";
 
 export const getProducts = (pageIndex, pageSize) =>
   apiClient.get(`/api/v1/products`);

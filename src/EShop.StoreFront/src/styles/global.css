@@ -14,13 +14,6 @@ body {
   height: 100%;
 }
 
-h1,
-h2,
-h3 {
-  margin: 0;
-  font-weight: 600;
-}
-
 header {
   position: fixed;
   top: 0;
@@ -28,40 +21,4 @@ header {
   width: 100%;
   z-index: 1000;
   background: rgb(255,255,255);
-  /* height: 120px; */
 }
-
-button {
-  cursor: pointer;
-  /* border: none; */
-  background: none;
-}
-
-a {
-  text-decoration: none;
-  color: inherit;
-}
-
-ul li {
-  list-style: none;
-}
-
-input[type="password"]::-ms-reveal,
-input[type="password"]::-ms-clear {
-  display: none;
-}
-
-/*  */
-.border{
-  border-color: rgb(204, 204, 204);
-}
-
-/* input,
-input:focus,
-input:active,
-input:hover,
-input:focus-visible {
-    outline: none;
-    border: none;
-    box-shadow: none;
-} */

@@ -1,24 +1,25 @@
-import { BasketPage } from "@pages/basket/index";
-import { ProductDetailPage } from "@pages/product/[id]/index";
-import { CheckoutPage } from "@pages/checkout/index";
-import { CheckoutStatusPage } from "@pages/checkout/[status]/index";
+import { BasketPage } from "@pages/Basket";
+import { ProductDetailPage } from "@pages/ProductDetail";
+import { CheckoutPage } from "@pages/Checkout";
+import { CheckoutStatusPage } from "@pages/CheckoutStatus";
 import { NotFoundPage } from "@pages/NotFound";
-import { HomePage } from "@pages/home/index";
+import { HomePage } from "@pages/Home";
 import { RootLayout } from "@components/layouts/Root";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { AuthGuard } from "@features/auth/AuthGuard";
 
 const routes = [
   {
     element: <RootLayout />,
     children: [
       { path: "/", element: <HomePage /> },
-      { path: "/product/:id", element: <ProductDetailPage /> },
+      { path: "/product/:id", element: <AuthGuard><ProductDetailPage /></AuthGuard> },
     ],
     errorElement: <NotFoundPage />,
   },
-  { path: "/cart", element: <BasketPage /> },
-  { path: "/checkout", element: <CheckoutPage /> },
-  { path: "/checkout/:status", element: <CheckoutStatusPage /> },
+  { path: "/cart", element: <AuthGuard><BasketPage /></AuthGuard> },
+  { path: "/checkout", element: <AuthGuard><CheckoutPage /></AuthGuard> },
+  { path: "/checkout/:status", element: <AuthGuard><CheckoutStatusPage /></AuthGuard> },
   { path: "*", element: <NotFoundPage /> },
 ];
 

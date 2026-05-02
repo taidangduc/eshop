@@ -1,7 +1,9 @@
-export const IS_DEV = import.meta.env.MODE === "development";
+/*
+* Base URL for the Backend For Frontend (BFF) service
+*/
+export const API_BASE_URL = "https://localhost:5002/bff";
 
-export const IS_E2E = import.meta.env.MODE === "e2e";
-
-export const API_CONFIG_PROD_URL = "https://api.eshop.com";
-
-export const API_CONFIG_DEV_URL = "http://localhost:5002";
+/*
+* Base URL for accessing image files
+*/
+export const FILE_BASE_URL = "http://127.0.0.1:10000/devstoreaccount1/media/uploads/";   

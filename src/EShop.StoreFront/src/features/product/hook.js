@@ -1,8 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { getProduct, getVariantByOptions } from "./api";
 import { useEffect, useMemo, useState } from "react";
-import { formatCurrency } from "../../lib/format";
-import { useDebouncedValue } from "../../hooks/useDebouncedValue";
+import { formatCurrency } from "@lib/format";
+import { useDebouncedValue } from "@hooks/useDebouncedValue";
 
 export function useProduct(productId) {
   const [selectedOption, setSelectedOption] = useState({});

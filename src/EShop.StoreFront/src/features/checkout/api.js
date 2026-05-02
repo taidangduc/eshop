@@ -1,5 +1,5 @@
-import { authClient } from "@/lib/auth-client";
-import { apiClient } from "@/lib/api-client";
+import { authClient } from "@lib/auth-client";
+import { apiClient } from "@lib/api-client";
 
 export const getOrder = () => authClient.get(`/api/v1/orders`);
 

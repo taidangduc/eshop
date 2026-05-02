@@ -1,34 +1,14 @@
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import p from "path";
 import tailwindcss from "@tailwindcss/vite";
 
-// https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, process.cwd(), "");
-
   return {
     plugins: [react(), tailwindcss()],
     server: {
       port: 3000,
       host: true,
-      // proxy for dev
-      // proxy: {
-      //   "/api": {
-      //     target:
-      //       process.env.services__apiservice__https__0 ||
-      //       process.env.services__apiservice__http__0  || "http://api:80",
-      //     changeOrigin: true,
-      //     secure: false,
-      //   },
-      // },
-      proxy: {
-        "/bff": {
-          target: "https://localhost:5002",
-          changeOrigin: true,
-          secure: false,
-        },
-      },
     },
     build: {
       outDir: "dist",
@@ -40,11 +20,14 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": p.resolve(__dirname, "./src"),
-        "@pages": p.resolve(__dirname, "src/pages"),
-        "@app": p.resolve(__dirname, "src/app"),
-        "@features": p.resolve(__dirname, "src/features"),
-        "@components": p.resolve(__dirname, "src/components"),
-        "@assets": p.resolve(__dirname, "src/assets"),
+        "@pages": p.resolve(__dirname, "./src/pages"),
+        "@app": p.resolve(__dirname, "./src/app"),
+        "@features": p.resolve(__dirname, "./src/features"),
+        "@components": p.resolve(__dirname, "./src/components"),
+        "@lib": p.resolve(__dirname, "./src/lib"),
+        "@hooks": p.resolve(__dirname, "./src/hooks"),
+        "@env": p.resolve(__dirname, "./src/env"),
+        "@public": p.resolve(__dirname, "./src/public"),
       },
     },
     css: {

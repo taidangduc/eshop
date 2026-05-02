@@ -1,28 +1,19 @@
-import fallbackImage from "@/public/default.jpg";
-import { useAuth } from "@features/auth/hook";
+import fallbackImage from "@public/default.jpg";
+import { useAuth } from "@features/auth/context";
+import { Link } from "react-router-dom";
 
 export function NavbarLayout() {
   const { user, isAuthenticated, login, logout, isLoading } = useAuth();
 
   return (
     <div className="bg-white">
-      <section
-        className="container-wrapper mx-auto"
-        style={{
-          fontSize: "14px",
-          lineHeight: "16.8px",
-        }}
-      >
+      <section className="w-[1200px] mx-auto bg-white">
         <div className="flex flex-col flex-1">
           <div className="flex flex-row flex-1 justify-end">
             <div className="flex flex-end">
-              <ul className="flex items-center m-0" style={{ height: "34px" }}>
+              <ul className="flex items-center m-0">
                 <li>
-                  <a
-                    href="/language"
-                    className="flex items-center"
-                    style={{ padding: "7px 10px" }}
-                  >
+                  <Link to="/language" className="flex items-center">
                     <span>
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -37,88 +28,36 @@ export function NavbarLayout() {
                         </g>
                       </svg>
                     </span>
-                    <span
-                      style={{
-                        margin: "0 5px",
-                        fontSize: "13px",
-                        lineHeight: "15.6px",
-                        fontWeight: 300,
-                      }}
-                    >
-                      English
-                    </span>
-                  </a>
+                    <span className="pl-2">English</span>
+                  </Link>
                 </li>
-                {isAuthenticated ? (
-                  <li style={{ padding: "0 10px" }}>
-                    <div className="flex items-center">
-                      <a href="/user" className="flex relative">
-                        <div
-                          className="flex items-center"
-                          style={{ padding: "5px 0" }}
-                        >
-                          <div>
-                            <img
-                              src={fallbackImage}
-                              alt=""
-                              height={20}
-                              width={20}
-                              style={{ borderRadius: "50%" }}
-                            />
-                          </div>
-                          <span style={{ padding: "0 10px" }}>
+                <li className="px-2">
+                  {isAuthenticated ? (
+                    <div className="flex items-center w-[100px] ml-2">
+                      <Link to="/user" className="flex relative">
+                        <div className="flex items-center py-1">
+                          <span className="px-2">
                             {user?.userName || user?.name || "guest"}
                           </span>
-                          <div
-                            className="block"
-                            style={{
-                              height: "13px",
-                              borderLeft: "1px solid black",
-                            }}
-                          ></div>
+                          <div className="block border-l border-gray-900 h-4 mx-1"></div>
                         </div>
-                      </a>
+                      </Link>
                       <a
                         onClick={() => logout()}
-                        className="flex relative"
-                        style={{ padding: "0 10px", cursor: "pointer" }}
+                        className="flex relative px-2 cursor-pointer"
                       >
                         Logout
                       </a>
                     </div>
-                  </li>
-                ) : (
-                  <>
-                    {/* GUEST */}
-                    {/* OLD v1 */}
-                    {/* <a
-                      href="/signup"
-                      className="flex relative"
-                      style={{ padding: "0 10px" }}
-                    >
-                      Sign up
-                    </a>
-                    <div
-                      className="block"
-                      style={{ height: "13px", borderLeft: "1px solid black" }}
-                    ></div>
-                    <a
-                      href="/login"
-                      className="flex items-center relative"
-                      style={{ padding: "0 10px" }}
-                    >
-                      Login
-                    </a> */}
-                    {/* NEW v2 */}
+                  ) : (
                     <a
                       onClick={() => login()}
-                      className="flex items-center relative"
-                      style={{ padding: "0 10px", cursor: "pointer" }}
+                      className="flex justify-center items-center w-[100px] ml-2 cursor-pointer"
                     >
                       Login
                     </a>
-                  </>
-                )}
+                  )}
+                </li>
               </ul>
             </div>
           </div>
@@ -127,4 +66,3 @@ export function NavbarLayout() {
     </div>
   );
 }
- 

@@ -1,13 +1,13 @@
-import { createContext, useMemo } from "react";
+import { createContext, useMemo, useContext } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { getProfile } from "./api";
+import { API_BASE_URL } from "@env";
 
 const AuthContext = createContext(null);
 
-const BFF_BASE_URL =
-  import.meta.env.VITE_BFF_URL ||
-  import.meta.env.REACT_APP_BFF_URL ||
-  "https://localhost:5002/bff";
+const returnUrl = encodeURIComponent(
+  window.location.pathname + window.location.search,
+);
 
 const getProfileSafe = async () => {
   try {
@@ -15,9 +15,13 @@ const getProfileSafe = async () => {
     return data ?? null;
   } catch (error) {
     if (error?.response?.status === 401 || error?.status === 401) {
+      /*
+       * If the user is not authenticated, we can return null for the profile.
+       * For case guest user, we can return null for the profile as well.
+       */
       return null;
     }
-    return null;
+    throw error;
   }
 };
 
@@ -33,31 +37,19 @@ export const AuthProvider = ({ children }) => {
   } = useQuery({
     queryKey: ["auth", "profile"],
     queryFn: getProfileSafe,
-    staleTime: 60_000,
+    staleTime: 5 * 60 * 1000,
     retry: false,
   });
 
   const login = async () => {
-    const returnUrl = encodeURIComponent(
-      window.location.pathname + window.location.search,
-    );
-    window.location.href = `${BFF_BASE_URL}/login?returnUrl=${returnUrl}`;
-    return { success: true };
+    const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+    window.location.href = `${API_BASE_URL}/login?returnUrl=${returnUrl}`;
   };
 
   const logout = async () => {
     queryClient.setQueryData(["auth", "profile"], null);
-    const returnUrl = encodeURIComponent(window.location.origin);
-    window.location.href = `${BFF_BASE_URL}/logout?returnUrl=${returnUrl}`;
-    return { success: true };
-  };
-
-  const signup = async () => {
-    const returnUrl = encodeURIComponent(
-      window.location.pathname + window.location.search,
-    );
-    window.location.href = `${BFF_BASE_URL}/register?returnUrl=${returnUrl}`;
-    return { success: true };
+    const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+    window.location.href = `${API_BASE_URL}/logout?returnUrl=${returnUrl}`;
   };
 
   const ctx = useMemo(
@@ -69,7 +61,6 @@ export const AuthProvider = ({ children }) => {
       error,
       login,
       logout,
-      signup,
       refetchProfile: refetch,
     }),
     [user, isLoading, isFetching, error, refetch],
@@ -78,4 +69,10 @@ export const AuthProvider = ({ children }) => {
   return <AuthContext.Provider value={ctx}>{children}</AuthContext.Provider>;
 };
 
-export { AuthContext };
+export const useAuth = () => {
+  const ctx = useContext(AuthContext);
+  if (!ctx) {
+    throw new Error("useAuth must be used within a AuthProvider");
+  }
+  return ctx;
+};

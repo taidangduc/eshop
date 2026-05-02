@@ -3,7 +3,6 @@ import { useState, useEffect } from "react";
 import { getProducts } from "../api";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Pagination } from "@/components/ui";
 
 export function ProductList() {
   const location = useLocation();
@@ -49,7 +48,7 @@ export function ProductList() {
     <div>
       {data && (
         <>
-          <div className="container-wrapper h-full mx-auto">
+          <div className="h-full">
             <div className="flex flex-wrap mx-auto">
               {data.map((x) => (
                 <ProductCard key={x.id} product={x} />
@@ -58,8 +57,6 @@ export function ProductList() {
           </div>
         </>
       )}
-      {/* -------- PAGINATION -------- */}
-      {/* <Pagination currentPage={page} totalPage={totalPage} onChange={setPage} /> */}
     </div>
   );
 }

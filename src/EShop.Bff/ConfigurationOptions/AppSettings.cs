@@ -3,6 +3,7 @@ namespace EShop.Bff.ConfigurationOptions;
 public class AppSettings
 {
     public OpenIdConnect? OpenIdConnect { get; set; }
+    public CORS CORS { get; set; }
 }
 
 public class OpenIdConnect

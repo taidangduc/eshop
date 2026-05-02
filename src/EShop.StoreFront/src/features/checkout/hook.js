@@ -11,7 +11,7 @@ export function useCheckout() {
 
   const [error, setError] = useState(null);
   const [validated, setValidated] = useState(false);
-  const [paymentMethod, setPaymentMethod] = useState(PAYMENT_PROVIDERS[0].id);
+  const [paymentMethod, setPaymentMethod] = useState(0);
   const [paymentProvider, setPaymentProvider] = useState(PAYMENT_PROVIDERS[0]);
   const [shippingAddress, setShippingAddress] = useState(
     SHIPPING_ADDRESS_MODEL,

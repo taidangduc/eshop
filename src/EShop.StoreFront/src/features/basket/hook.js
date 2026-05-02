@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { updateBasket, getBasket } from "./api";
 import { useMemo, useState } from "react";
-import { useDebouncedValue } from "../../hooks/useDebouncedValue";
+import { useDebouncedValue } from "@hooks/useDebouncedValue";
 
 export function useBasket() {
   const [confirmedDelete, setConfirmedDelete] = useState(false);

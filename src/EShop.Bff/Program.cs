@@ -36,6 +36,17 @@ builder.Services.AddReverseProxy()
 
 builder.Services.AddControllers();
 
+builder.Services.AddCors(options =>
+{
+   options.AddPolicy("AllowedOrigins", builder =>
+   {
+       builder.WithOrigins(appSettings.CORS.AllowedOrigins)
+              .AllowAnyHeader()
+              .AllowAnyMethod()
+              .AllowCredentials();
+   });
+});
+
 builder.Services.AddAntiforgery(options =>
 {
     options.HeaderName = "X-XSRF-TOKEN";
@@ -96,6 +107,8 @@ var app = builder.Build();
 app.MapControllers();
 
 app.MapDefaultEndpoints();
+
+app.UseCors("AllowedOrigins");
 
 app.Use(async (context, next) =>
 {
