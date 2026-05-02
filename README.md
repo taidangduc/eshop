@@ -52,3 +52,6 @@ Provide a sample production-ready foundation for an online store with clean arch
 
 #### Identity Server
 <img src="./docs/imgs/identity-server-demo.gif">
+
+#### StoreFront
+<img src="./docs/imgs/storefront-demo.gif">
