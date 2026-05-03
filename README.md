@@ -48,6 +48,15 @@ Provide a sample production-ready foundation for an online store with clean arch
 - ✔️ `Aspire` – local orchestration for multi-service development.
 - ✔️ `Microsoft.Extensions.Caching.Memory` – in-memory caching support.
 
+## The Clean Architecture
+<img src="./docs/imgs/the-clean-architecture.png">
+
+## Solution Structure
+<img src="./docs/imgs/solution-structure.png">
+
+## Workflow
+<img src="./docs/imgs/workflow.png">
+
 ## Demo
 
 #### Identity Server
@@ -55,3 +64,4 @@ Provide a sample production-ready foundation for an online store with clean arch
 
 #### StoreFront
 <img src="./docs/imgs/storefront-demo.gif">
+
